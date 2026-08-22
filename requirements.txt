@@ -1,0 +1,10 @@
+fastapi==0.103.2
+uvicorn==0.22.0
+sqlalchemy==2.0.51
+psycopg2-binary==2.9.9
+python-jose==3.4.0
+passlib[bcrypt]==1.7.4
+python-dotenv==0.21.1
+python-multipart==0.0.8
+pydantic[email]==2.5.3
+qrcode[pil]==7.4.2

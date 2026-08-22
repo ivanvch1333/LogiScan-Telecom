@@ -1,0 +1,36 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache y compilaciones
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Base de datos local
+*.db
+*.sqlite3
+
+# Archivos de configuración sensibles / Entorno
+.env
+.flaskenv
+
+# Logins e imágenes cargadas dinámicamente
+static/uploads/logo*
+static/uploads/banner*
+static/uploads/config.json
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

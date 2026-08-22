@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="LogiScan Telecom - Sistema Web Mobile para el Control de Inventarios, Conciliación de Activos y Trazabilidad">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>LogiScan Telecom - Control de Inventario</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+</head>
+<body>
+
+    <!-- ==========================================
+         TOAST CONTAINER
+         ========================================== -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- ==========================================
+         LOGIN PAGE
+         ========================================== -->
+    <div id="login-page" class="login-page">
+        <div class="login-card">
+            <div class="login-logo">
+                <img id="login-logo-img" src="" alt="Logo" style="display:none;">
+                <h1 id="login-company-name">LogiScan Telecom</h1>
+                <p>Sistema de Conciliación y Control de Activos</p>
+            </div>
+            <div id="login-error" class="login-error"></div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="login-username">Usuario</label>
+                    <input class="form-input" type="text" id="login-username" name="username" placeholder="Ingrese su usuario" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="login-password">Contraseña</label>
+                    <input class="form-input" type="password" id="login-password" name="password" placeholder="Ingrese su contraseña" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;font-size:0.95rem;">
+                    Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         APP LAYOUT
+         ========================================== -->
+    <div id="app-layout" class="app-layout hidden">
+
+        <!-- Mobile sidebar toggle -->
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img id="sidebar-logo-img" src="" alt="Logo" style="display:none;">
+                    <span id="sidebar-logo-text" class="sidebar-logo-text">LogiScan Telecom</span>
+                </div>
+            </div>
+            <nav id="sidebar-nav" class="sidebar-nav">
+                <!-- Nav items are built dynamically by JS -->
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div id="sidebar-avatar" class="user-avatar">A</div>
+                    <div class="sidebar-user-info">
+                        <div id="sidebar-user-name" class="sidebar-user-name">—</div>
+                        <div id="sidebar-user-role" class="sidebar-user-role">—</div>
+                    </div>
+                    <button class="btn-logout" onclick="logout()" title="Cerrar sesión">⏻</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <span id="top-bar-company" class="top-bar-title">LogiScan Telecom</span>
+                </div>
+                <div class="top-bar-right">
+                    <span id="top-bar-user" class="top-bar-user"></span>
+                </div>
+            </div>
+
+            <!-- Banner Area -->
+            <div id="banner-area" class="banner-area hidden">
+                <img id="banner-img" src="" alt="Banner Corporativo">
+            </div>
+
+            <!-- Content Wrapper -->
+            <div class="content-wrapper">
+
+                <!-- ======== DASHBOARD ======== -->
+                <div id="view-dashboard" class="view-section active">
+                    <h1 class="section-title">Dashboard de Conciliación</h1>
+
+                    <div class="stats-grid">
+                        <div class="stat-card stat-total">
+                            <div class="stat-icon">📦</div>
+                            <div id="stat-total" class="stat-value">0</div>
+                            <div class="stat-label">Total Materiales</div>
+                        </div>
+                        <div class="stat-card stat-operativo">
+                            <div class="stat-icon">✅</div>
+                            <div id="stat-disponibles" class="stat-value">0</div>
+                            <div class="stat-label">Disponible</div>
+                        </div>
+                        <div class="stat-card stat-total" style="border-left-color: var(--accent-secondary);">
+                            <div class="stat-icon">👥</div>
+                            <div id="stat-asignados" class="stat-value">0</div>
+                            <div class="stat-label">Asignado</div>
+                        </div>
+                        <div class="stat-card stat-mantenimiento">
+                            <div class="stat-icon">🔧</div>
+                            <div id="stat-mantenimiento" class="stat-value">0</div>
+                            <div class="stat-label">En Mantenimiento</div>
+                        </div>
+                        <div class="stat-card stat-emergencia">
+                            <div class="stat-icon">🚨</div>
+                            <div id="stat-bajas" class="stat-value">0</div>
+                            <div class="stat-label">De Baja</div>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <div class="chart-title">Distribución por Categoría</div>
+                            <div id="chart-categorias" class="bar-chart"></div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">Distribución por SLOC (Ubicación)</div>
+                            <div id="chart-ubicaciones" class="bar-chart"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span style="font-weight:600;color:var(--text-primary);">Materiales Recientes</span>
+                        </div>
+                        <div id="recent-equipos" class="data-table-wrapper"></div>
+                    </div>
+
+                    <!-- Resumen de Roles -->
+                    <div class="charts-grid" style="margin-top:var(--space-xl);">
+                        <div class="chart-card">
+                            <div class="chart-title">👤 Rol: Administrador</div>
+                            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;color:var(--text-secondary);line-height:2;">
+                                <li>✅ Ver dashboard y métricas de conciliación</li>
+                                <li>✅ Registrar y modificar materiales (Plant, SLOC, Asset Tag, Qty SAP/EAIM)</li>
+                                <li>✅ Registrar movimientos de trazabilidad de equipos</li>
+                                <li>✅ Búsqueda y escaneo QR con cámara móvil en bodega</li>
+                                <li>✅ Exportación de auditoría en Excel (.xlsx) y PDF</li>
+                                <li>✅ <strong style="color:var(--accent-secondary)">Crear, editar roles y eliminar usuarios (RBAC)</strong></li>
+                                <li>✅ <strong style="color:var(--accent-secondary)">Configurar marca (logo, banner, nombre)</strong></li>
+                            </ul>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">🔧 Rol: Técnico / Bodeguero</div>
+                            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;color:var(--text-secondary);line-height:2;">
+                                <li>✅ Ver dashboard y métricas de conciliación</li>
+                                <li>✅ Registrar y modificar materiales (Plant, SLOC, Asset Tag, Qty SAP/EAIM)</li>
+                                <li>✅ Registrar movimientos de trazabilidad de equipos</li>
+                                <li>✅ Búsqueda y escaneo QR con cámara móvil en bodega</li>
+                                <li>✅ Exportación de auditoría en Excel (.xlsx) y PDF</li>
+                                <li>❌ <span style="color:var(--text-muted)">No puede gestionar usuarios ni roles</span></li>
+                                <li>❌ <span style="color:var(--text-muted)">No puede configurar marca ni logotipo de empresa</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======== EQUIPOS ======== -->
+                <div id="view-equipos" class="view-section">
+                    <h1 class="section-title">
+                        Control de Inventario SAP vs EAIM
+                        <div class="section-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="exportExcel()" title="Descargar Excel">📊 Excel</button>
+                            <button class="btn btn-secondary btn-sm" onclick="exportPDF()" title="Descargar PDF">📄 PDF</button>
+                            <button class="btn btn-primary" onclick="showNewEquipoModal()">+ Nuevo Equipo</button>
+                        </div>
+                    </h1>
+
+                    <div class="filter-bar">
+                        <div class="search-input-wrapper" style="flex:2;">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="search-input" id="filter-search" placeholder="Buscar por serie, tag, material..." oninput="filterEquipos()">
+                        </div>
+                        <input type="text" class="form-input" id="filter-planta" placeholder="Planta" oninput="filterEquipos()" style="width:auto;max-width:120px;">
+                        
+                        <select class="form-select" id="filter-sloc" onchange="filterEquipos()" style="width:auto;min-width:120px;">
+                            <option value="">SLOC (Ubicación)</option>
+                            <option value="1000">1000</option>
+                            <option value="2000">2000</option>
+                            <option value="1010">1010</option>
+                            <option value="Almacén Central">Almacén Central</option>
+                        </select>
+                        <select class="form-select" id="filter-estado" onchange="filterEquipos()" style="width:auto;min-width:110px;">
+                            <option value="">Estado</option>
+                            <option value="disponible">Disponible</option>
+                            <option value="asignado">Asignado</option>
+                            <option value="en_mantenimiento">En Mantenimiento</option>
+                            <option value="baja">De Baja</option>
+                        </select>
+                        <select class="form-select" id="filter-mes" onchange="filterEquipos()" style="width:auto;min-width:85px;">
+                            <option value="">Mes</option>
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                        <select class="form-select" id="filter-anio" onchange="filterEquipos()" style="width:auto;min-width:80px;">
+                            <option value="">Año</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                        </select>
+                    </div>
+
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Material (Código)</th>
+                                    <th>Nombre / Descripción</th>
+                                    <th>Plant</th>
+                                    <th>SLOC (Ubicación)</th>
+                                    <th>Asset Tag (Placa)</th>
+                                    <th>Nº Serie</th>
+                                    <th>Qty SAP</th>
+                                    <th>Qty EAIM</th>
+                                    <th>Desviación</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipos-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ======== MOVIMIENTOS ======== -->
+                <div id="view-movimientos" class="view-section">
+                    <h1 class="section-title">Registrar Movimiento / Trazabilidad</h1>
+
+                    <div class="card" style="max-width:650px;">
+                        <form id="movimiento-form" onsubmit="submitMovimiento(event)">
+                            <div class="form-group">
+                                <label class="form-label" for="mov-equipo">Equipo/Material *</label>
+                                <select class="form-select" id="mov-equipo" name="equipo_id" required>
+                                    <option value="">-- Seleccionar equipo --</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="mov-tipo">Tipo de Movimiento *</label>
+                                    <select class="form-select" id="mov-tipo" name="tipo_movimiento" required>
+                                        <option value="">-- Seleccionar --</option>
+                                        <option value="ingreso_almacen">Ingreso Almacén</option>
+                                        <option value="instalacion_nodo">Instalación Nodo</option>
+                                        <option value="retiro_mantenimiento">Retiro Mantenimiento</option>
+                                        <option value="reemplazo_emergencia">Reemplazo Emergencia</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="mov-destino">SLOC Destino *</label>
+                                    <select class="form-select" id="mov-destino" name="ubicacion_destino" required>
+                                        <option value="">-- Seleccionar --</option>
+                                        <option value="1000">1000</option>
+                                        <option value="2000">2000</option>
+                                        <option value="1010">1010</option>
+                                        <option value="Almacén Central">Almacén Central</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Apartado dinámico para datos de cliente (solo visible si se selecciona instalación) -->
+                            <div class="form-row" id="mov-cliente-fields" style="display:none; border-left:3px solid var(--accent-primary); padding-left:var(--space-md); margin-bottom:var(--space-md);">
+                                <div class="form-group">
+                                    <label class="form-label" for="mov-cliente-nombre">Nombre del Cliente *</label>
+                                    <input class="form-input" id="mov-cliente-nombre" name="cliente_nombre" placeholder="Nombre completo o Empresa">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="mov-cliente-direccion">Dirección del Cliente *</label>
+                                    <input class="form-input" id="mov-cliente-direccion" name="cliente_direccion" placeholder="Dirección del domicilio / nodo">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="mov-estado">Nuevo Estado (opcional)</label>
+                                <select class="form-select" id="mov-estado" name="nuevo_estado">
+                                    <option value="">-- Sin cambio --</option>
+                                    <option value="disponible">Disponible</option>
+                                    <option value="asignado">Asignado</option>
+                                    <option value="en_mantenimiento">En Mantenimiento</option>
+                                    <option value="baja">De Baja</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="mov-obs">Observaciones / Novedades técnicas</label>
+                                <textarea class="form-textarea" id="mov-obs" name="observaciones" placeholder="Indicar observaciones físicas o novedades al momento del traslado..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;">Registrar Movimiento</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ======== BÚSQUEDA QR ======== -->
+                <div id="view-busqueda-qr" class="view-section">
+                    <h1 class="section-title">Escanear QR / Búsqueda Mobile</h1>
+
+                    <div class="qr-search-section">
+                        <div style="text-align:center;margin-bottom:var(--space-md);">
+                            <button id="btn-toggle-camera" class="btn btn-primary" onclick="toggleCameraScanner()" style="padding:12px 24px;font-size:1rem;gap:8px;">
+                                📷 Iniciar Escáner de Cámara
+                            </button>
+                        </div>
+
+                        <!-- Lector de código QR de la cámara html5-qrcode -->
+                        <div id="qr-reader-container" class="card" style="display:none;margin-bottom:var(--space-lg);max-width:450px;margin-left:auto;margin-right:auto;overflow:hidden;">
+                            <div id="qr-reader" style="width: 100%; background: #000;"></div>
+                            <button class="btn btn-secondary btn-sm" onclick="stopCameraScanner()" style="width:100%;border-radius:0;border:none;padding:10px;">✕ Detener Cámara</button>
+                        </div>
+
+                        <div class="qr-search-input-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="qr-search-input" id="qr-search-input" placeholder="Ingrese Nº Serie o Asset Tag..." onkeydown="if(event.key==='Enter')buscarPorSerie()">
+                        </div>
+                        <div style="text-align:center;margin-bottom:var(--space-xl);">
+                            <button class="btn btn-secondary" onclick="buscarPorSerie()">Consultar Activo</button>
+                        </div>
+                        <div id="qr-search-result"></div>
+                    </div>
+                </div>
+
+                <!-- ======== USUARIOS (Admin) ======== -->
+                <div id="view-usuarios" class="view-section">
+                    <h1 class="section-title">
+                        Gestión de Usuarios (RBAC)
+                        <div class="section-actions">
+                            <button class="btn btn-primary" onclick="showNewUserModal()">+ Nuevo Usuario</button>
+                        </div>
+                    </h1>
+
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ======== AJUSTES (Admin) ======== -->
+                <div id="view-ajustes" class="view-section">
+                    <h1 class="section-title">Ajustes de LogiScan</h1>
+
+                    <form id="config-form" onsubmit="submitConfig(event)">
+                        <div class="config-section">
+                            <div class="config-title">Identidad del Proyecto / Empresa</div>
+                            <div class="form-group">
+                                <label class="form-label" for="config-nombre">Nombre del Proyecto</label>
+                                <input class="form-input" type="text" id="config-nombre" name="nombre_empresa" placeholder="Nombre del proyecto">
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <div class="config-title">Logotipo Oficial</div>
+                            <div class="config-upload-group">
+                                <div id="config-logo-preview" class="config-preview-box">
+                                    <span style="font-size:0.8rem;color:var(--text-muted)">Sin logo cargado</span>
+                                </div>
+                                <label class="upload-zone" for="config-logo-file">
+                                    <div class="upload-zone-icon">🖼️</div>
+                                    <div class="upload-zone-text" style="font-weight:600;">Subir Nuevo Logotipo</div>
+                                    <div class="upload-zone-hint">Haga clic para seleccionar (PNG o JPG)</div>
+                                    <input type="file" id="config-logo-file" name="logo" accept="image/*" style="display:none;" onchange="previewImage(this, 'config-logo-preview')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <div class="config-title">Banner de Bienvenida</div>
+                            <div class="config-upload-group" style="grid-template-columns: 260px 1fr;">
+                                <div id="config-banner-preview" class="config-preview-box">
+                                    <span style="font-size:0.8rem;color:var(--text-muted)">Sin banner cargado</span>
+                                </div>
+                                <label class="upload-zone" for="config-banner-file">
+                                    <div class="upload-zone-icon">🏞️</div>
+                                    <div class="upload-zone-text" style="font-weight:600;">Subir Nuevo Banner</div>
+                                    <div class="upload-zone-hint">Haga clic para seleccionar (Imagen horizontal)</div>
+                                    <input type="file" id="config-banner-file" name="banner" accept="image/*" style="display:none;" onchange="previewImage(this, 'config-banner-preview')">
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:var(--space-md);">
+                            Guardar Configuración
+                        </button>
+                    </form>
+                </div>
+
+            </div><!-- /content-wrapper -->
+        </main>
+    </div><!-- /app-layout -->
+
+    <!-- ==========================================
+         MODALS
+         ========================================== -->
+
+    <!-- Modal: Nuevo Equipo -->
+    <div id="new-equipo-modal" class="modal-overlay">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Activo en Inventario</h2>
+                <button class="modal-close" onclick="closeAllModals()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="new-equipo-form" onsubmit="submitNewEquipo(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nombre / Descripción del Equipo *</label>
+                            <input class="form-input" name="nombre" placeholder="Ej: Router Huawei NetEngine 8000" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Código Material SAP *</label>
+                            <input class="form-input" name="material" placeholder="Ej: MAT-RT-HW8K" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nº Serie *</label>
+                            <input class="form-input" name="numero_serie" placeholder="Ej: SN-2026-00987" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Asset Tag (Placa Activo) *</label>
+                            <input class="form-input" name="asset_tag" placeholder="Ej: PLA-EC-998811" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Marca *</label>
+                            <input class="form-input" name="marca" placeholder="Ej: Huawei" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Modelo *</label>
+                            <input class="form-input" name="modelo" placeholder="Ej: NE8000" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Plant (Planta SAP) *</label>
+                            <input class="form-input" name="plant" placeholder="Ej: Planta Latacunga" value="Planta Latacunga" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SLOC (Storage Location / Ubicación) *</label>
+                            <select class="form-select" name="ubicacion_actual" id="new-equipo-sloc" required>
+                                <option value="Almacén Central">Almacén Central</option>
+                                <option value="1000">1000</option>
+                                <option value="2000">2000</option>
+                                <option value="1010">1010</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Apartado opcional de datos de cliente al registrar si ya está instalado -->
+                    <div class="form-row" id="new-equipo-cliente-fields" style="border-left:3px solid var(--accent-secondary); padding-left:var(--space-md); margin-bottom:var(--space-md);">
+                        <div class="form-group">
+                            <label class="form-label">Nombre del Cliente (Si aplica)</label>
+                            <input class="form-input" name="cliente_nombre" placeholder="Nombre completo o Empresa">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dirección del Cliente (Si aplica)</label>
+                            <input class="form-input" name="cliente_direccion" placeholder="Dirección del domicilio / nodo">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Cantidad Teórica (Qty SAP) *</label>
+                            <input class="form-input" type="number" name="qty_sap" value="1" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cantidad Física Real (Qty EAIM) *</label>
+                            <input class="form-input" type="number" name="qty_eaim" value="0" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Categoría *</label>
+                            <select class="form-select" name="categoria" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="router">Router</option>
+                                <option value="switch">Switch</option>
+                                <option value="olt">OLT</option>
+                                <option value="edfa">EDFA</option>
+                                <option value="enlace_radio">Enlace Radio</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estado Conciliación</label>
+                            <select class="form-select" name="estado">
+                                <option value="disponible">Disponible</option>
+                                <option value="asignado">Asignado</option>
+                                <option value="en_mantenimiento">En Mantenimiento</option>
+                                <option value="baja">De Baja</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding:0;border:none;margin-top:var(--space-md);">
+                        <button type="button" class="btn btn-secondary" onclick="closeAllModals()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar Activo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalle Equipo -->
+    <div id="detail-modal" class="modal-overlay">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2 id="detail-modal-title" class="modal-title">Detalle del Equipo</h2>
+                <button class="modal-close" onclick="closeAllModals()">×</button>
+            </div>
+            <div id="detail-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Modal: QR Code -->
+    <div id="qr-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="qr-modal-title" class="modal-title">Código QR</h2>
+                <button class="modal-close" onclick="closeAllModals()">×</button>
+            </div>
+            <div id="qr-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo Usuario -->
+    <div id="new-user-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Crear Nuevo Usuario</h2>
+                <button class="modal-close" onclick="closeAllModals()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="new-user-form" onsubmit="submitNewUser(event)">
+                    <div class="form-group">
+                        <label class="form-label">Nombre Completo *</label>
+                        <input class="form-input" name="nombre_completo" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nombre de Usuario *</label>
+                            <input class="form-input" name="username" placeholder="Ej: jperez" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Correo Electrónico *</label>
+                            <input class="form-input" type="email" name="email" placeholder="correo@ejemplo.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Contraseña *</label>
+                            <input class="form-input" type="password" name="password" placeholder="Mínimo 8 caracteres (A-Z, 0-9, especial)" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rol</label>
+                            <select class="form-select" name="rol">
+                                <option value="tecnico">Técnico</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding:0;border:none;margin-top:var(--space-md);">
+                        <button type="button" class="btn btn-secondary" onclick="closeAllModals()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Librerías para exportación y escáner QR -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
