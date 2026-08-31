@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,37 +8,66 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>LogiScan Telecom - Control de Inventario</title>
+
+    <!-- Tailwind CSS CDN (Semana 3 y 4) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              bgPrimary: 'hsl(220, 25%, 8%)',
+              bgSecondary: 'hsl(225, 22%, 12%)',
+              bgSidebar: 'hsl(230, 25%, 11%)',
+              bgSurface: 'hsla(225, 25%, 16%, 0.6)',
+              cyanAccent: 'hsl(175, 80%, 45%)',
+              indigoAccent: 'hsl(230, 70%, 58%)',
+              stateOperativo: '#2ecc71',
+              stateMantenimiento: '#e67e22',
+              stateEmergencia: '#e74c3c',
+              stateBaja: '#95a5a6'
+            },
+            fontFamily: {
+              inter: ['Inter', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Hojas de Estilo del Proyecto (Integración SASS) -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
 </head>
-<body>
+<body class="bg-[hsl(220,25%,8%)] text-slate-100 font-inter min-h-screen antialiased selection:bg-emerald-500 selection:text-slate-950">
 
     <!-- ==========================================
          TOAST CONTAINER
          ========================================== -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container fixed top-4 right-4 z-[2000] flex flex-col gap-2"></div>
 
     <!-- ==========================================
          LOGIN PAGE
          ========================================== -->
-    <div id="login-page" class="login-page">
-        <div class="login-card">
-            <div class="login-logo">
-                <img id="login-logo-img" src="" alt="Logo" style="display:none;">
-                <h1 id="login-company-name">LogiScan Telecom</h1>
-                <p>Sistema de Conciliación y Control de Activos</p>
+    <div id="login-page" class="login-page flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div class="login-card bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 w-full max-w-md shadow-2xl animate-fade-in-up">
+            <div class="login-logo text-center mb-6">
+                <img id="login-logo-img" src="" alt="Logo" class="max-h-20 mx-auto mb-4" style="display:none;">
+                <h1 id="login-company-name" class="text-2xl font-bold text-slate-100 tracking-tight">LogiScan Telecom</h1>
+                <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider">Sistema de Conciliación y Control de Activos</p>
             </div>
-            <div id="login-error" class="login-error"></div>
-            <form id="login-form" class="login-form">
+            <div id="login-error" class="login-error text-red-400 bg-red-500/10 border border-red-500/20 text-xs p-3 rounded-lg mb-4 text-center hidden"></div>
+            <form id="login-form" class="login-form space-y-4">
                 <div class="form-group">
-                    <label class="form-label" for="login-username">Usuario</label>
-                    <input class="form-input" type="text" id="login-username" name="username" placeholder="Ingrese su usuario" autocomplete="username" required>
+                    <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="login-username">Usuario</label>
+                    <input class="form-input w-full px-4 py-2.5 bg-slate-950/80 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all" type="text" id="login-username" name="username" placeholder="Ingrese su usuario" autocomplete="username" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="login-password">Contraseña</label>
-                    <input class="form-input" type="password" id="login-password" name="password" placeholder="Ingrese su contraseña" autocomplete="current-password" required>
+                    <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="login-password">Contraseña</label>
+                    <input class="form-input w-full px-4 py-2.5 bg-slate-950/80 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all" type="password" id="login-password" name="password" placeholder="Ingrese su contraseña" autocomplete="current-password" required>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;font-size:0.95rem;">
+                <button type="submit" class="btn btn-primary w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/20 mt-2">
                     Iniciar Sesión
                 </button>
             </form>
@@ -48,129 +77,129 @@
     <!-- ==========================================
          APP LAYOUT
          ========================================== -->
-    <div id="app-layout" class="app-layout hidden">
+    <div id="app-layout" class="app-layout hidden min-h-screen flex flex-col md:flex-row">
 
         <!-- Mobile sidebar toggle -->
-        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+        <button class="sidebar-toggle md:hidden fixed top-3 left-3 z-50 p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200" onclick="toggleSidebar()">☰</button>
+        <div class="sidebar-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden" onclick="toggleSidebar()"></div>
 
         <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <img id="sidebar-logo-img" src="" alt="Logo" style="display:none;">
-                    <span id="sidebar-logo-text" class="sidebar-logo-text">LogiScan Telecom</span>
+        <aside class="sidebar fixed md:static inset-y-0 left-0 z-50 w-64 bg-[hsl(230,25%,11%)] border-r border-slate-800 flex flex-col transition-transform duration-300">
+            <div class="sidebar-header p-5 border-b border-slate-800 flex items-center gap-3">
+                <div class="sidebar-logo flex items-center gap-3">
+                    <img id="sidebar-logo-img" src="" alt="Logo" class="max-h-8" style="display:none;">
+                    <span id="sidebar-logo-text" class="sidebar-logo-text font-bold text-lg text-slate-100 tracking-tight">LogiScan Telecom</span>
                 </div>
             </div>
-            <nav id="sidebar-nav" class="sidebar-nav">
+            <nav id="sidebar-nav" class="sidebar-nav flex-1 p-4 space-y-1 overflow-y-auto">
                 <!-- Nav items are built dynamically by JS -->
             </nav>
-            <div class="sidebar-footer">
-                <div class="sidebar-user">
-                    <div id="sidebar-avatar" class="user-avatar">A</div>
-                    <div class="sidebar-user-info">
-                        <div id="sidebar-user-name" class="sidebar-user-name">—</div>
-                        <div id="sidebar-user-role" class="sidebar-user-role">—</div>
+            <div class="sidebar-footer p-4 border-t border-slate-800">
+                <div class="sidebar-user flex items-center justify-between gap-3">
+                    <div id="sidebar-avatar" class="user-avatar w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center border border-emerald-500/30">A</div>
+                    <div class="sidebar-user-info flex-1 min-w-0">
+                        <div id="sidebar-user-name" class="sidebar-user-name text-sm font-semibold text-slate-200 truncate">—</div>
+                        <div id="sidebar-user-role" class="sidebar-user-role text-xs text-slate-400 truncate">—</div>
                     </div>
-                    <button class="btn-logout" onclick="logout()" title="Cerrar sesión">⏻</button>
+                    <button class="btn-logout text-slate-400 hover:text-red-400 p-1.5 transition-colors" onclick="logout()" title="Cerrar sesión">⏻</button>
                 </div>
             </div>
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="main-content">
+        <main class="main-content flex-1 flex flex-col min-w-0 bg-[hsl(220,25%,8%)]">
             <!-- Top Bar -->
-            <div class="top-bar">
-                <div class="top-bar-left">
-                    <span id="top-bar-company" class="top-bar-title">LogiScan Telecom</span>
+            <div class="top-bar h-16 border-b border-slate-800 px-6 flex items-center justify-between bg-slate-900/40 backdrop-blur-md">
+                <div class="top-bar-left flex items-center gap-3">
+                    <span id="top-bar-company" class="top-bar-title font-semibold text-slate-200 text-sm md:text-base">LogiScan Telecom</span>
                 </div>
-                <div class="top-bar-right">
-                    <span id="top-bar-user" class="top-bar-user"></span>
+                <div class="top-bar-right flex items-center gap-4">
+                    <span id="top-bar-user" class="top-bar-user text-xs text-slate-400 font-medium"></span>
                 </div>
             </div>
 
             <!-- Banner Area -->
-            <div id="banner-area" class="banner-area hidden">
-                <img id="banner-img" src="" alt="Banner Corporativo">
+            <div id="banner-area" class="banner-area hidden px-6 pt-6">
+                <img id="banner-img" src="" alt="Banner Corporativo" class="w-full max-h-36 object-cover rounded-xl border border-slate-800">
             </div>
 
             <!-- Content Wrapper -->
-            <div class="content-wrapper">
+            <div class="content-wrapper p-4 md:p-6 space-y-6">
 
                 <!-- ======== DASHBOARD ======== -->
                 <div id="view-dashboard" class="view-section active">
-                    <h1 class="section-title">Dashboard de Conciliación</h1>
+                    <h1 class="section-title text-xl font-bold text-slate-100 mb-6 flex items-center justify-between">Dashboard de Conciliación</h1>
 
-                    <div class="stats-grid">
-                        <div class="stat-card stat-total">
-                            <div class="stat-icon">📦</div>
-                            <div id="stat-total" class="stat-value">0</div>
-                            <div class="stat-label">Total Materiales</div>
+                    <div class="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                        <div class="stat-card stat-total bg-slate-900/60 backdrop-blur-xl border border-slate-800 border-l-4 border-l-slate-400 rounded-xl p-4 shadow-xl">
+                            <div class="stat-icon text-2xl mb-1">📦</div>
+                            <div id="stat-total" class="stat-value text-2xl font-extrabold text-slate-100">0</div>
+                            <div class="stat-label text-xs font-medium text-slate-400 uppercase tracking-wider mt-1">Total Materiales</div>
                         </div>
-                        <div class="stat-card stat-operativo">
-                            <div class="stat-icon">✅</div>
-                            <div id="stat-disponibles" class="stat-value">0</div>
-                            <div class="stat-label">Disponible</div>
+                        <div class="stat-card stat-operativo bg-slate-900/60 backdrop-blur-xl border border-slate-800 border-l-4 border-l-emerald-500 rounded-xl p-4 shadow-xl">
+                            <div class="stat-icon text-2xl mb-1">✅</div>
+                            <div id="stat-disponibles" class="stat-value text-2xl font-extrabold text-emerald-400">0</div>
+                            <div class="stat-label text-xs font-medium text-slate-400 uppercase tracking-wider mt-1">Disponible</div>
                         </div>
-                        <div class="stat-card stat-total" style="border-left-color: var(--accent-secondary);">
-                            <div class="stat-icon">👥</div>
-                            <div id="stat-asignados" class="stat-value">0</div>
-                            <div class="stat-label">Asignado</div>
+                        <div class="stat-card stat-total bg-slate-900/60 backdrop-blur-xl border border-slate-800 border-l-4 border-l-indigo-500 rounded-xl p-4 shadow-xl">
+                            <div class="stat-icon text-2xl mb-1">👥</div>
+                            <div id="stat-asignados" class="stat-value text-2xl font-extrabold text-indigo-400">0</div>
+                            <div class="stat-label text-xs font-medium text-slate-400 uppercase tracking-wider mt-1">Asignado</div>
                         </div>
-                        <div class="stat-card stat-mantenimiento">
-                            <div class="stat-icon">🔧</div>
-                            <div id="stat-mantenimiento" class="stat-value">0</div>
-                            <div class="stat-label">En Mantenimiento</div>
+                        <div class="stat-card stat-mantenimiento bg-slate-900/60 backdrop-blur-xl border border-slate-800 border-l-4 border-l-amber-500 rounded-xl p-4 shadow-xl">
+                            <div class="stat-icon text-2xl mb-1">🔧</div>
+                            <div id="stat-mantenimiento" class="stat-value text-2xl font-extrabold text-amber-400">0</div>
+                            <div class="stat-label text-xs font-medium text-slate-400 uppercase tracking-wider mt-1">En Mantenimiento</div>
                         </div>
-                        <div class="stat-card stat-emergencia">
-                            <div class="stat-icon">🚨</div>
-                            <div id="stat-bajas" class="stat-value">0</div>
-                            <div class="stat-label">De Baja</div>
+                        <div class="stat-card stat-emergencia bg-slate-900/60 backdrop-blur-xl border border-slate-800 border-l-4 border-l-rose-500 rounded-xl p-4 shadow-xl">
+                            <div class="stat-icon text-2xl mb-1">🚨</div>
+                            <div id="stat-bajas" class="stat-value text-2xl font-extrabold text-rose-400">0</div>
+                            <div class="stat-label text-xs font-medium text-slate-400 uppercase tracking-wider mt-1">De Baja</div>
                         </div>
                     </div>
 
-                    <div class="charts-grid">
-                        <div class="chart-card">
-                            <div class="chart-title">Distribución por Categoría</div>
-                            <div id="chart-categorias" class="bar-chart"></div>
+                    <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="chart-card bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl p-5 shadow-xl">
+                            <div class="chart-title text-sm font-semibold text-slate-200 mb-4 pb-2 border-b border-slate-800">Distribución por Categoría</div>
+                            <div id="chart-categorias" class="bar-chart space-y-3"></div>
                         </div>
-                        <div class="chart-card">
-                            <div class="chart-title">Distribución por SLOC (Ubicación)</div>
-                            <div id="chart-ubicaciones" class="bar-chart"></div>
+                        <div class="chart-card bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl p-5 shadow-xl">
+                            <div class="chart-title text-sm font-semibold text-slate-200 mb-4 pb-2 border-b border-slate-800">Distribución por SLOC (Ubicación)</div>
+                            <div id="chart-ubicaciones" class="bar-chart space-y-3"></div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <span style="font-weight:600;color:var(--text-primary);">Materiales Recientes</span>
+                    <div class="card bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl p-5 shadow-xl">
+                        <div class="card-header mb-4 pb-2 border-b border-slate-800">
+                            <span class="font-semibold text-slate-200">Materiales Recientes</span>
                         </div>
-                        <div id="recent-equipos" class="data-table-wrapper"></div>
+                        <div id="recent-equipos" class="data-table-wrapper overflow-x-auto"></div>
                     </div>
 
                     <!-- Resumen de Roles -->
-                    <div class="charts-grid" style="margin-top:var(--space-xl);">
-                        <div class="chart-card">
-                            <div class="chart-title">👤 Rol: Administrador</div>
-                            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;color:var(--text-secondary);line-height:2;">
+                    <div class="charts-grid grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="chart-card bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl p-5 shadow-xl">
+                            <div class="chart-title text-sm font-semibold text-emerald-400 mb-3">👤 Rol: Administrador</div>
+                            <ul class="space-y-2 text-xs text-slate-300">
                                 <li>✅ Ver dashboard y métricas de conciliación</li>
                                 <li>✅ Registrar y modificar materiales (Plant, SLOC, Asset Tag, Qty SAP/EAIM)</li>
                                 <li>✅ Registrar movimientos de trazabilidad de equipos</li>
                                 <li>✅ Búsqueda y escaneo QR con cámara móvil en bodega</li>
                                 <li>✅ Exportación de auditoría en Excel (.xlsx) y PDF</li>
-                                <li>✅ <strong style="color:var(--accent-secondary)">Crear, editar roles y eliminar usuarios (RBAC)</strong></li>
-                                <li>✅ <strong style="color:var(--accent-secondary)">Configurar marca (logo, banner, nombre)</strong></li>
+                                <li>✅ <strong class="text-indigo-400">Crear, editar roles y eliminar usuarios (RBAC)</strong></li>
+                                <li>✅ <strong class="text-indigo-400">Configurar marca (logo, banner, nombre)</strong></li>
                             </ul>
                         </div>
-                        <div class="chart-card">
-                            <div class="chart-title">🔧 Rol: Técnico / Bodeguero</div>
-                            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;color:var(--text-secondary);line-height:2;">
+                        <div class="chart-card bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl p-5 shadow-xl">
+                            <div class="chart-title text-sm font-semibold text-cyanAccent mb-3">🔧 Rol: Técnico / Bodeguero</div>
+                            <ul class="space-y-2 text-xs text-slate-300">
                                 <li>✅ Ver dashboard y métricas de conciliación</li>
                                 <li>✅ Registrar y modificar materiales (Plant, SLOC, Asset Tag, Qty SAP/EAIM)</li>
                                 <li>✅ Registrar movimientos de trazabilidad de equipos</li>
                                 <li>✅ Búsqueda y escaneo QR con cámara móvil en bodega</li>
                                 <li>✅ Exportación de auditoría en Excel (.xlsx) y PDF</li>
-                                <li>❌ <span style="color:var(--text-muted)">No puede gestionar usuarios ni roles</span></li>
-                                <li>❌ <span style="color:var(--text-muted)">No puede configurar marca ni logotipo de empresa</span></li>
+                                <li>❌ <span class="text-slate-500">No puede gestionar usuarios ni roles</span></li>
+                                <li>❌ <span class="text-slate-500">No puede configurar marca ni logotipo de empresa</span></li>
                             </ul>
                         </div>
                     </div>
@@ -178,37 +207,37 @@
 
                 <!-- ======== EQUIPOS ======== -->
                 <div id="view-equipos" class="view-section">
-                    <h1 class="section-title">
+                    <h1 class="section-title text-xl font-bold text-slate-100 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         Control de Inventario SAP vs EAIM
-                        <div class="section-actions">
-                            <button class="btn btn-secondary btn-sm" onclick="exportExcel()" title="Descargar Excel">📊 Excel</button>
-                            <button class="btn btn-secondary btn-sm" onclick="exportPDF()" title="Descargar PDF">📄 PDF</button>
-                            <button class="btn btn-primary" onclick="showNewEquipoModal()">+ Nuevo Equipo</button>
+                        <div class="section-actions flex items-center gap-2">
+                            <button class="btn btn-secondary btn-sm px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs rounded-lg transition-all" onclick="exportExcel()" title="Descargar Excel">📊 Excel</button>
+                            <button class="btn btn-secondary btn-sm px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs rounded-lg transition-all" onclick="exportPDF()" title="Descargar PDF">📄 PDF</button>
+                            <button class="btn btn-primary px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold text-xs rounded-lg transition-all shadow-md shadow-emerald-500/20" onclick="showNewEquipoModal()">+ Nuevo Equipo</button>
                         </div>
                     </h1>
 
-                    <div class="filter-bar">
-                        <div class="search-input-wrapper" style="flex:2;">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" class="search-input" id="filter-search" placeholder="Buscar por serie, tag, material..." oninput="filterEquipos()">
+                    <div class="filter-bar bg-slate-900/60 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center gap-3 mb-6">
+                        <div class="search-input-wrapper flex-1 min-w-[200px] relative">
+                            <span class="search-icon absolute left-3 top-2.5 text-slate-500 text-sm">🔍</span>
+                            <input type="text" class="search-input w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-emerald-400" id="filter-search" placeholder="Buscar por serie, tag, material..." oninput="filterEquipos()">
                         </div>
-                        <input type="text" class="form-input" id="filter-planta" placeholder="Planta" oninput="filterEquipos()" style="width:auto;max-width:120px;">
+                        <input type="text" class="form-input px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm w-28" id="filter-planta" placeholder="Planta" oninput="filterEquipos()">
                         
-                        <select class="form-select" id="filter-sloc" onchange="filterEquipos()" style="width:auto;min-width:120px;">
+                        <select class="form-select px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-300" id="filter-sloc" onchange="filterEquipos()">
                             <option value="">SLOC (Ubicación)</option>
                             <option value="1000">1000</option>
                             <option value="2000">2000</option>
                             <option value="1010">1010</option>
                             <option value="Almacén Central">Almacén Central</option>
                         </select>
-                        <select class="form-select" id="filter-estado" onchange="filterEquipos()" style="width:auto;min-width:110px;">
+                        <select class="form-select px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-300" id="filter-estado" onchange="filterEquipos()">
                             <option value="">Estado</option>
                             <option value="disponible">Disponible</option>
                             <option value="asignado">Asignado</option>
                             <option value="en_mantenimiento">En Mantenimiento</option>
                             <option value="baja">De Baja</option>
                         </select>
-                        <select class="form-select" id="filter-mes" onchange="filterEquipos()" style="width:auto;min-width:85px;">
+                        <select class="form-select px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-300" id="filter-mes" onchange="filterEquipos()">
                             <option value="">Mes</option>
                             <option value="1">Enero</option>
                             <option value="2">Febrero</option>
@@ -223,7 +252,7 @@
                             <option value="11">Noviembre</option>
                             <option value="12">Diciembre</option>
                         </select>
-                        <select class="form-select" id="filter-anio" onchange="filterEquipos()" style="width:auto;min-width:80px;">
+                        <select class="form-select px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-300" id="filter-anio" onchange="filterEquipos()">
                             <option value="">Año</option>
                             <option value="2026">2026</option>
                             <option value="2027">2027</option>
@@ -231,44 +260,44 @@
                         </select>
                     </div>
 
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead>
+                    <div class="data-table-wrapper overflow-x-auto bg-slate-900/60 border border-slate-800 rounded-xl shadow-xl">
+                        <table class="data-table w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-900 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
                                 <tr>
-                                    <th>Material (Código)</th>
-                                    <th>Nombre / Descripción</th>
-                                    <th>Plant</th>
-                                    <th>SLOC (Ubicación)</th>
-                                    <th>Asset Tag (Placa)</th>
-                                    <th>Nº Serie</th>
-                                    <th>Qty SAP</th>
-                                    <th>Qty EAIM</th>
-                                    <th>Desviación</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th class="p-3">Material (Código)</th>
+                                    <th class="p-3">Nombre / Descripción</th>
+                                    <th class="p-3">Plant</th>
+                                    <th class="p-3">SLOC (Ubicación)</th>
+                                    <th class="p-3">Asset Tag (Placa)</th>
+                                    <th class="p-3">Nº Serie</th>
+                                    <th class="p-3 text-center">Qty SAP</th>
+                                    <th class="p-3 text-center">Qty EAIM</th>
+                                    <th class="p-3 text-center">Desviación</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="equipos-table-body"></tbody>
+                            <tbody id="equipos-table-body" class="divide-y divide-slate-800/60"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- ======== MOVIMIENTOS ======== -->
                 <div id="view-movimientos" class="view-section">
-                    <h1 class="section-title">Registrar Movimiento / Trazabilidad</h1>
+                    <h1 class="section-title text-xl font-bold text-slate-100 mb-6">Registrar Movimiento / Trazabilidad</h1>
 
-                    <div class="card" style="max-width:650px;">
-                        <form id="movimiento-form" onsubmit="submitMovimiento(event)">
+                    <div class="card bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl p-6 shadow-xl max-w-2xl">
+                        <form id="movimiento-form" onsubmit="submitMovimiento(event)" class="space-y-4">
                             <div class="form-group">
-                                <label class="form-label" for="mov-equipo">Equipo/Material *</label>
-                                <select class="form-select" id="mov-equipo" name="equipo_id" required>
+                                <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="mov-equipo">Equipo/Material *</label>
+                                <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" id="mov-equipo" name="equipo_id" required>
                                     <option value="">-- Seleccionar equipo --</option>
                                 </select>
                             </div>
-                            <div class="form-row">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="form-group">
-                                    <label class="form-label" for="mov-tipo">Tipo de Movimiento *</label>
-                                    <select class="form-select" id="mov-tipo" name="tipo_movimiento" required>
+                                    <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="mov-tipo">Tipo de Movimiento *</label>
+                                    <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" id="mov-tipo" name="tipo_movimiento" required>
                                         <option value="">-- Seleccionar --</option>
                                         <option value="ingreso_almacen">Ingreso Almacén</option>
                                         <option value="instalacion_nodo">Instalación Nodo</option>
@@ -277,8 +306,8 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="mov-destino">SLOC Destino *</label>
-                                    <select class="form-select" id="mov-destino" name="ubicacion_destino" required>
+                                    <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="mov-destino">SLOC Destino *</label>
+                                    <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" id="mov-destino" name="ubicacion_destino" required>
                                         <option value="">-- Seleccionar --</option>
                                         <option value="1000">1000</option>
                                         <option value="2000">2000</option>
@@ -288,21 +317,21 @@
                                 </div>
                             </div>
 
-                            <!-- Apartado dinámico para datos de cliente (solo visible si se selecciona instalación) -->
-                            <div class="form-row" id="mov-cliente-fields" style="display:none; border-left:3px solid var(--accent-primary); padding-left:var(--space-md); margin-bottom:var(--space-md);">
+                            <!-- Apartado dinámico para datos de cliente -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="mov-cliente-fields" style="display:none; border-left:3px solid var(--accent-primary); padding-left:1rem;">
                                 <div class="form-group">
-                                    <label class="form-label" for="mov-cliente-nombre">Nombre del Cliente *</label>
-                                    <input class="form-input" id="mov-cliente-nombre" name="cliente_nombre" placeholder="Nombre completo o Empresa">
+                                    <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="mov-cliente-nombre">Nombre del Cliente *</label>
+                                    <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" id="mov-cliente-nombre" name="cliente_nombre" placeholder="Nombre completo o Empresa">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="mov-cliente-direccion">Dirección del Cliente *</label>
-                                    <input class="form-input" id="mov-cliente-direccion" name="cliente_direccion" placeholder="Dirección del domicilio / nodo">
+                                    <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="mov-cliente-direccion">Dirección del Cliente *</label>
+                                    <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" id="mov-cliente-direccion" name="cliente_direccion" placeholder="Dirección del domicilio / nodo">
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label" for="mov-estado">Nuevo Estado (opcional)</label>
-                                <select class="form-select" id="mov-estado" name="nuevo_estado">
+                                <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="mov-estado">Nuevo Estado (opcional)</label>
+                                <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" id="mov-estado" name="nuevo_estado">
                                     <option value="">-- Sin cambio --</option>
                                     <option value="disponible">Disponible</option>
                                     <option value="asignado">Asignado</option>
@@ -311,37 +340,37 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="mov-obs">Observaciones / Novedades técnicas</label>
-                                <textarea class="form-textarea" id="mov-obs" name="observaciones" placeholder="Indicar observaciones físicas o novedades al momento del traslado..."></textarea>
+                                <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="mov-obs">Observaciones / Novedades técnicas</label>
+                                <textarea class="form-textarea w-full p-3 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 min-h-[90px]" id="mov-obs" name="observaciones" placeholder="Indicar observaciones físicas o novedades al momento del traslado..."></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;">Registrar Movimiento</button>
+                            <button type="submit" class="btn btn-primary w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/20">Registrar Movimiento</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- ======== BÚSQUEDA QR ======== -->
                 <div id="view-busqueda-qr" class="view-section">
-                    <h1 class="section-title">Escanear QR / Búsqueda Mobile</h1>
+                    <h1 class="section-title text-xl font-bold text-slate-100 mb-6">Escanear QR / Búsqueda Mobile</h1>
 
-                    <div class="qr-search-section">
-                        <div style="text-align:center;margin-bottom:var(--space-md);">
-                            <button id="btn-toggle-camera" class="btn btn-primary" onclick="toggleCameraScanner()" style="padding:12px 24px;font-size:1rem;gap:8px;">
+                    <div class="qr-search-section max-w-xl mx-auto">
+                        <div class="text-center mb-6">
+                            <button id="btn-toggle-camera" class="btn btn-primary px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 inline-flex items-center gap-2" onclick="toggleCameraScanner()">
                                 📷 Iniciar Escáner de Cámara
                             </button>
                         </div>
 
                         <!-- Lector de código QR de la cámara html5-qrcode -->
-                        <div id="qr-reader-container" class="card" style="display:none;margin-bottom:var(--space-lg);max-width:450px;margin-left:auto;margin-right:auto;overflow:hidden;">
-                            <div id="qr-reader" style="width: 100%; background: #000;"></div>
-                            <button class="btn btn-secondary btn-sm" onclick="stopCameraScanner()" style="width:100%;border-radius:0;border:none;padding:10px;">✕ Detener Cámara</button>
+                        <div id="qr-reader-container" class="card bg-slate-900 border border-slate-800 rounded-xl p-4 mb-6 hidden max-w-md mx-auto overflow-hidden">
+                            <div id="qr-reader" class="w-full bg-black rounded-lg overflow-hidden"></div>
+                            <button class="btn btn-secondary text-xs w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border-t border-slate-700 mt-2" onclick="stopCameraScanner()">✕ Detener Cámara</button>
                         </div>
 
-                        <div class="qr-search-input-wrapper">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" class="qr-search-input" id="qr-search-input" placeholder="Ingrese Nº Serie o Asset Tag..." onkeydown="if(event.key==='Enter')buscarPorSerie()">
+                        <div class="qr-search-input-wrapper relative mb-4">
+                            <span class="search-icon absolute left-4 top-3.5 text-slate-500 text-lg">🔍</span>
+                            <input type="text" class="qr-search-input w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 text-base focus:outline-none focus:border-emerald-400" id="qr-search-input" placeholder="Ingrese Nº Serie o Asset Tag..." onkeydown="if(event.key==='Enter')buscarPorSerie()">
                         </div>
-                        <div style="text-align:center;margin-bottom:var(--space-xl);">
-                            <button class="btn btn-secondary" onclick="buscarPorSerie()">Consultar Activo</button>
+                        <div class="text-center mb-8">
+                            <button class="btn btn-secondary px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-sm font-semibold rounded-lg" onclick="buscarPorSerie()">Consultar Activo</button>
                         </div>
                         <div id="qr-search-result"></div>
                     </div>
@@ -349,74 +378,74 @@
 
                 <!-- ======== USUARIOS (Admin) ======== -->
                 <div id="view-usuarios" class="view-section">
-                    <h1 class="section-title">
+                    <h1 class="section-title text-xl font-bold text-slate-100 mb-6 flex items-center justify-between">
                         Gestión de Usuarios (RBAC)
                         <div class="section-actions">
-                            <button class="btn btn-primary" onclick="showNewUserModal()">+ Nuevo Usuario</button>
+                            <button class="btn btn-primary px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-lg shadow-md shadow-emerald-500/20" onclick="showNewUserModal()">+ Nuevo Usuario</button>
                         </div>
                     </h1>
 
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead>
+                    <div class="data-table-wrapper overflow-x-auto bg-slate-900/60 border border-slate-800 rounded-xl shadow-xl">
+                        <table class="data-table w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-900 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Usuario</th>
-                                    <th>Email</th>
-                                    <th>Rol</th>
-                                    <th>Fecha Creación</th>
-                                    <th>Acciones</th>
+                                    <th class="p-3">Nombre</th>
+                                    <th class="p-3">Usuario</th>
+                                    <th class="p-3">Email</th>
+                                    <th class="p-3">Rol</th>
+                                    <th class="p-3">Fecha Creación</th>
+                                    <th class="p-3 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="usuarios-table-body"></tbody>
+                            <tbody id="usuarios-table-body" class="divide-y divide-slate-800/60"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- ======== AJUSTES (Admin) ======== -->
                 <div id="view-ajustes" class="view-section">
-                    <h1 class="section-title">Ajustes de LogiScan</h1>
+                    <h1 class="section-title text-xl font-bold text-slate-100 mb-6">Ajustes de LogiScan</h1>
 
-                    <form id="config-form" onsubmit="submitConfig(event)">
-                        <div class="config-section">
-                            <div class="config-title">Identidad del Proyecto / Empresa</div>
+                    <form id="config-form" onsubmit="submitConfig(event)" class="space-y-6 max-w-3xl">
+                        <div class="config-section bg-slate-900/60 border border-slate-800 rounded-xl p-6 shadow-xl">
+                            <div class="config-title text-sm font-semibold text-slate-200 mb-4 pb-2 border-b border-slate-800">Identidad del Proyecto / Empresa</div>
                             <div class="form-group">
-                                <label class="form-label" for="config-nombre">Nombre del Proyecto</label>
-                                <input class="form-input" type="text" id="config-nombre" name="nombre_empresa" placeholder="Nombre del proyecto">
+                                <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1" for="config-nombre">Nombre del Proyecto</label>
+                                <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" type="text" id="config-nombre" name="nombre_empresa" placeholder="Nombre del proyecto">
                             </div>
                         </div>
 
-                        <div class="config-section">
-                            <div class="config-title">Logotipo Oficial</div>
-                            <div class="config-upload-group">
-                                <div id="config-logo-preview" class="config-preview-box">
-                                    <span style="font-size:0.8rem;color:var(--text-muted)">Sin logo cargado</span>
+                        <div class="config-section bg-slate-900/60 border border-slate-800 rounded-xl p-6 shadow-xl">
+                            <div class="config-title text-sm font-semibold text-slate-200 mb-4 pb-2 border-b border-slate-800">Logotipo Oficial</div>
+                            <div class="config-upload-group grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-4 items-center">
+                                <div id="config-logo-preview" class="config-preview-box h-28 bg-slate-950/60 border border-slate-800 rounded-lg flex items-center justify-center p-2 text-center text-xs text-slate-500">
+                                    <span>Sin logo cargado</span>
                                 </div>
-                                <label class="upload-zone" for="config-logo-file">
-                                    <div class="upload-zone-icon">🖼️</div>
-                                    <div class="upload-zone-text" style="font-weight:600;">Subir Nuevo Logotipo</div>
-                                    <div class="upload-zone-hint">Haga clic para seleccionar (PNG o JPG)</div>
-                                    <input type="file" id="config-logo-file" name="logo" accept="image/*" style="display:none;" onchange="previewImage(this, 'config-logo-preview')">
+                                <label class="upload-zone border-2 border-dashed border-slate-700 hover:border-emerald-400 bg-slate-950/40 rounded-lg h-28 flex flex-col items-center justify-center cursor-pointer transition-all p-4 text-center" for="config-logo-file">
+                                    <div class="upload-zone-icon text-xl mb-1">🖼️</div>
+                                    <div class="upload-zone-text text-xs font-semibold text-slate-200">Subir Nuevo Logotipo</div>
+                                    <div class="upload-zone-hint text-[10px] text-slate-500 mt-0.5">Haga clic para seleccionar (PNG o JPG)</div>
+                                    <input type="file" id="config-logo-file" name="logo" accept="image/*" class="hidden" onchange="previewImage(this, 'config-logo-preview')">
                                 </label>
                             </div>
                         </div>
 
-                        <div class="config-section">
-                            <div class="config-title">Banner de Bienvenida</div>
-                            <div class="config-upload-group" style="grid-template-columns: 260px 1fr;">
-                                <div id="config-banner-preview" class="config-preview-box">
-                                    <span style="font-size:0.8rem;color:var(--text-muted)">Sin banner cargado</span>
+                        <div class="config-section bg-slate-900/60 border border-slate-800 rounded-xl p-6 shadow-xl">
+                            <div class="config-title text-sm font-semibold text-slate-200 mb-4 pb-2 border-b border-slate-800">Banner de Bienvenida</div>
+                            <div class="config-upload-group grid grid-cols-1 sm:grid-cols-[260px_1fr] gap-4 items-center">
+                                <div id="config-banner-preview" class="config-preview-box h-28 bg-slate-950/60 border border-slate-800 rounded-lg flex items-center justify-center p-2 text-center text-xs text-slate-500">
+                                    <span>Sin banner cargado</span>
                                 </div>
-                                <label class="upload-zone" for="config-banner-file">
-                                    <div class="upload-zone-icon">🏞️</div>
-                                    <div class="upload-zone-text" style="font-weight:600;">Subir Nuevo Banner</div>
-                                    <div class="upload-zone-hint">Haga clic para seleccionar (Imagen horizontal)</div>
-                                    <input type="file" id="config-banner-file" name="banner" accept="image/*" style="display:none;" onchange="previewImage(this, 'config-banner-preview')">
+                                <label class="upload-zone border-2 border-dashed border-slate-700 hover:border-emerald-400 bg-slate-950/40 rounded-lg h-28 flex flex-col items-center justify-center cursor-pointer transition-all p-4 text-center" for="config-banner-file">
+                                    <div class="upload-zone-icon text-xl mb-1">🏞️</div>
+                                    <div class="upload-zone-text text-xs font-semibold text-slate-200">Subir Nuevo Banner</div>
+                                    <div class="upload-zone-hint text-[10px] text-slate-500 mt-0.5">Haga clic para seleccionar (Imagen horizontal)</div>
+                                    <input type="file" id="config-banner-file" name="banner" accept="image/*" class="hidden" onchange="previewImage(this, 'config-banner-preview')">
                                 </label>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:var(--space-md);">
+                        <button type="submit" class="btn btn-primary w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/20">
                             Guardar Configuración
                         </button>
                     </form>
@@ -431,52 +460,52 @@
          ========================================== -->
 
     <!-- Modal: Nuevo Equipo -->
-    <div id="new-equipo-modal" class="modal-overlay">
-        <div class="modal modal-lg">
-            <div class="modal-header">
-                <h2 class="modal-title">Registrar Activo en Inventario</h2>
-                <button class="modal-close" onclick="closeAllModals()">×</button>
+    <div id="new-equipo-modal" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4">
+        <div class="modal modal-lg bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="modal-header px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <h2 class="modal-title font-bold text-lg text-slate-100">Registrar Activo en Inventario</h2>
+                <button class="modal-close text-slate-400 hover:text-slate-100 text-xl" onclick="closeAllModals()">×</button>
             </div>
-            <div class="modal-body">
-                <form id="new-equipo-form" onsubmit="submitNewEquipo(event)">
-                    <div class="form-row">
+            <div class="modal-body p-6">
+                <form id="new-equipo-form" onsubmit="submitNewEquipo(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Nombre / Descripción del Equipo *</label>
-                            <input class="form-input" name="nombre" placeholder="Ej: Router Huawei NetEngine 8000" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nombre / Descripción del Equipo *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="nombre" placeholder="Ej: Router Huawei NetEngine 8000" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Código Material SAP *</label>
-                            <input class="form-input" name="material" placeholder="Ej: MAT-RT-HW8K" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Nº Serie *</label>
-                            <input class="form-input" name="numero_serie" placeholder="Ej: SN-2026-00987" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Asset Tag (Placa Activo) *</label>
-                            <input class="form-input" name="asset_tag" placeholder="Ej: PLA-EC-998811" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Código Material SAP *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="material" placeholder="Ej: MAT-RT-HW8K" required>
                         </div>
                     </div>
-                    <div class="form-row">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Marca *</label>
-                            <input class="form-input" name="marca" placeholder="Ej: Huawei" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nº Serie *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="numero_serie" placeholder="Ej: SN-2026-00987" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Modelo *</label>
-                            <input class="form-input" name="modelo" placeholder="Ej: NE8000" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Asset Tag (Placa Activo) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="asset_tag" placeholder="Ej: PLA-EC-998811" required>
                         </div>
                     </div>
-                    <div class="form-row">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Plant (Planta SAP) *</label>
-                            <input class="form-input" name="plant" placeholder="Ej: Planta Latacunga" value="Planta Latacunga" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Marca *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="marca" placeholder="Ej: Huawei" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">SLOC (Storage Location / Ubicación) *</label>
-                            <select class="form-select" name="ubicacion_actual" id="new-equipo-sloc" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Modelo *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="modelo" placeholder="Ej: NE8000" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Plant (Planta SAP) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="plant" placeholder="Ej: Planta Latacunga" value="Planta Latacunga" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">SLOC (Storage Location / Ubicación) *</label>
+                            <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="ubicacion_actual" id="new-equipo-sloc" required>
                                 <option value="Almacén Central">Almacén Central</option>
                                 <option value="1000">1000</option>
                                 <option value="2000">2000</option>
@@ -486,31 +515,31 @@
                     </div>
                     
                     <!-- Apartado opcional de datos de cliente al registrar si ya está instalado -->
-                    <div class="form-row" id="new-equipo-cliente-fields" style="border-left:3px solid var(--accent-secondary); padding-left:var(--space-md); margin-bottom:var(--space-md);">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="new-equipo-cliente-fields" style="border-left:3px solid var(--accent-secondary); padding-left:1rem;">
                         <div class="form-group">
-                            <label class="form-label">Nombre del Cliente (Si aplica)</label>
-                            <input class="form-input" name="cliente_nombre" placeholder="Nombre completo o Empresa">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nombre del Cliente (Si aplica)</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="cliente_nombre" placeholder="Nombre completo o Empresa">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Dirección del Cliente (Si aplica)</label>
-                            <input class="form-input" name="cliente_direccion" placeholder="Dirección del domicilio / nodo">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Dirección del Cliente (Si aplica)</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="cliente_direccion" placeholder="Dirección del domicilio / nodo">
                         </div>
                     </div>
 
-                    <div class="form-row">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Cantidad Teórica (Qty SAP) *</label>
-                            <input class="form-input" type="number" name="qty_sap" value="1" min="0" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Cantidad Teórica (Qty SAP) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" type="number" name="qty_sap" value="1" min="0" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Cantidad Física Real (Qty EAIM) *</label>
-                            <input class="form-input" type="number" name="qty_eaim" value="0" min="0" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Cantidad Física Real (Qty EAIM) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" type="number" name="qty_eaim" value="0" min="0" required>
                         </div>
                     </div>
-                    <div class="form-row">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Categoría *</label>
-                            <select class="form-select" name="categoria" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Categoría *</label>
+                            <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="categoria" required>
                                 <option value="">-- Seleccionar --</option>
                                 <option value="router">Router</option>
                                 <option value="switch">Switch</option>
@@ -521,8 +550,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Estado Conciliación</label>
-                            <select class="form-select" name="estado">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Estado Conciliación</label>
+                            <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="estado">
                                 <option value="disponible">Disponible</option>
                                 <option value="asignado">Asignado</option>
                                 <option value="en_mantenimiento">En Mantenimiento</option>
@@ -530,9 +559,9 @@
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer" style="padding:0;border:none;margin-top:var(--space-md);">
-                        <button type="button" class="btn btn-secondary" onclick="closeAllModals()">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Registrar Activo</button>
+                    <div class="modal-footer flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                        <button type="button" class="btn btn-secondary px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg" onclick="closeAllModals()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-lg shadow-md shadow-emerald-500/20">Registrar Activo</button>
                     </div>
                 </form>
             </div>
@@ -540,66 +569,66 @@
     </div>
 
     <!-- Modal: Detalle Equipo -->
-    <div id="detail-modal" class="modal-overlay">
-        <div class="modal modal-lg">
-            <div class="modal-header">
-                <h2 id="detail-modal-title" class="modal-title">Detalle del Equipo</h2>
-                <button class="modal-close" onclick="closeAllModals()">×</button>
+    <div id="detail-modal" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4">
+        <div class="modal modal-lg bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="modal-header px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <h2 id="detail-modal-title" class="modal-title font-bold text-lg text-slate-100">Detalle del Equipo</h2>
+                <button class="modal-close text-slate-400 hover:text-slate-100 text-xl" onclick="closeAllModals()">×</button>
             </div>
-            <div id="detail-modal-body" class="modal-body"></div>
+            <div id="detail-modal-body" class="modal-body p-6"></div>
         </div>
     </div>
 
     <!-- Modal: QR Code -->
-    <div id="qr-modal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 id="qr-modal-title" class="modal-title">Código QR</h2>
-                <button class="modal-close" onclick="closeAllModals()">×</button>
+    <div id="qr-modal" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4">
+        <div class="modal bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="modal-header px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <h2 id="qr-modal-title" class="modal-title font-bold text-lg text-slate-100">Código QR</h2>
+                <button class="modal-close text-slate-400 hover:text-slate-100 text-xl" onclick="closeAllModals()">×</button>
             </div>
-            <div id="qr-modal-body" class="modal-body"></div>
+            <div id="qr-modal-body" class="modal-body p-6"></div>
         </div>
     </div>
 
     <!-- Modal: Nuevo Usuario -->
-    <div id="new-user-modal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">Crear Nuevo Usuario</h2>
-                <button class="modal-close" onclick="closeAllModals()">×</button>
+    <div id="new-user-modal" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4">
+        <div class="modal bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="modal-header px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <h2 class="modal-title font-bold text-lg text-slate-100">Crear Nuevo Usuario</h2>
+                <button class="modal-close text-slate-400 hover:text-slate-100 text-xl" onclick="closeAllModals()">×</button>
             </div>
-            <div class="modal-body">
-                <form id="new-user-form" onsubmit="submitNewUser(event)">
+            <div class="modal-body p-6">
+                <form id="new-user-form" onsubmit="submitNewUser(event)" class="space-y-4">
                     <div class="form-group">
-                        <label class="form-label">Nombre Completo *</label>
-                        <input class="form-input" name="nombre_completo" placeholder="Ej: Juan Pérez" required>
+                        <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nombre Completo *</label>
+                        <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="nombre_completo" placeholder="Ej: Juan Pérez" required>
                     </div>
-                    <div class="form-row">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Nombre de Usuario *</label>
-                            <input class="form-input" name="username" placeholder="Ej: jperez" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nombre de Usuario *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="username" placeholder="Ej: jperez" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Correo Electrónico *</label>
-                            <input class="form-input" type="email" name="email" placeholder="correo@ejemplo.com" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Correo Electrónico *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" type="email" name="email" placeholder="correo@ejemplo.com" required>
                         </div>
                     </div>
-                    <div class="form-row">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Contraseña *</label>
-                            <input class="form-input" type="password" name="password" placeholder="Mínimo 8 caracteres (A-Z, 0-9, especial)" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Contraseña *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" type="password" name="password" placeholder="Mínimo 8 caracteres (A-Z, 0-9, especial)" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Rol</label>
-                            <select class="form-select" name="rol">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Rol</label>
+                            <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="rol">
                                 <option value="tecnico">Técnico</option>
                                 <option value="admin">Administrador</option>
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer" style="padding:0;border:none;margin-top:var(--space-md);">
-                        <button type="button" class="btn btn-secondary" onclick="closeAllModals()">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                    <div class="modal-footer flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                        <button type="button" class="btn btn-secondary px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg" onclick="closeAllModals()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-lg shadow-md shadow-emerald-500/20">Crear Usuario</button>
                     </div>
                 </form>
             </div>

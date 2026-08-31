@@ -1,0 +1,77 @@
+// ==========================================
+// LogiScan Telecom - SASS Components (Nesting)
+// ==========================================
+
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// Timeline Component with SASS Nesting
+.timeline {
+  position: relative;
+  padding-left: 1.5rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: hsla(220, 20%, 30%, 0.4);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 1.25rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: calc(-1.5rem + 4px);
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: $color-cyan;
+      border: 2px solid $color-bg-primary;
+      z-index: 1;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-date {
+      font-size: 0.7rem;
+      color: hsl(215, 12%, 48%);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .timeline-content {
+      @include glassmorphism(0.4);
+      border-radius: 8px;
+      padding: 0.75rem;
+
+      .timeline-type {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: hsl(210, 20%, 92%);
+        margin-bottom: 2px;
+      }
+
+      .timeline-detail {
+        font-size: 0.8rem;
+        color: hsl(215, 15%, 65%);
+      }
+    }
+  }
+}
+
+// Custom Badges using Mixins
+.badge-operativo { @include badge-style($color-operativo); }
+.badge-mantenimiento { @include badge-style($color-mantenimiento); }
+.badge-emergencia { @include badge-style($color-emergencia); }
+.badge-baja { @include badge-style($color-baja); }
+.badge-admin { @include badge-style($color-indigo); }
+.badge-tecnico { @include badge-style($color-cyan); }

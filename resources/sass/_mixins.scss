@@ -1,0 +1,33 @@
+// ==========================================
+// LogiScan Telecom - SASS Mixins
+// ==========================================
+
+@use 'variables' as *;
+
+@mixin glassmorphism($opacity: 0.6) {
+  background: hsla(225, 25%, 16%, $opacity);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsla(220, 20%, 30%, 0.4);
+}
+
+@mixin responsive($breakpoint) {
+  @if $breakpoint == mobile {
+    @media (max-width: $breakpoint-mobile) { @content; }
+  } @else if $breakpoint == tablet {
+    @media (max-width: $breakpoint-tablet) { @content; }
+  }
+}
+
+@mixin badge-style($color) {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: rgba($color, 0.12);
+  color: $color;
+  border: 1px solid rgba($color, 0.2);
+}

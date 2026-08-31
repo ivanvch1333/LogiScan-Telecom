@@ -1,0 +1,26 @@
+// ==========================================
+// LogiScan Telecom - SASS QR Scanner Camera Component
+// ==========================================
+
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.qr-reader-container {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem;
+  @include glassmorphism(0.5);
+  border-radius: 12px;
+
+  #qr-reader {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    border: none !important;
+
+    video {
+      border-radius: 8px;
+      object-fit: cover;
+    }
+  }
+}

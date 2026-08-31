@@ -1,0 +1,27 @@
+// ==========================================
+// LogiScan Telecom - SASS Variables
+// ==========================================
+
+// Main Colors
+$color-bg-primary: hsl(220, 25%, 8%);
+$color-bg-secondary: hsl(225, 22%, 12%);
+$color-bg-sidebar: hsl(230, 25%, 11%);
+$color-bg-card: hsla(225, 25%, 16%, 0.6);
+$color-bg-input: hsla(225, 20%, 18%, 0.8);
+
+// Accents
+$color-cyan: hsl(175, 80%, 45%);
+$color-cyan-hover: hsl(175, 80%, 38%);
+$color-indigo: hsl(230, 70%, 58%);
+$color-indigo-hover: hsl(230, 70%, 50%);
+
+// Equipment States
+$color-operativo: #2ecc71;
+$color-mantenimiento: #e67e22;
+$color-emergencia: #e74c3c;
+$color-baja: #95a5a6;
+
+// Typography & Breakpoints
+$font-family-base: 'Inter', sans-serif;
+$breakpoint-mobile: 768px;
+$breakpoint-tablet: 1024px;
