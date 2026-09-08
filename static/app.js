@@ -1027,28 +1027,41 @@ function exportExcel() {
         return;
     }
 
-    const rows = APP.equipos.map(e => ({
-        'Material': e.material,
-        'Nombre/Descripción': e.nombre,
-        'Plant': e.plant,
-        'SLOC (Ubicación)': e.ubicacion_actual,
-        'Asset Tag': e.asset_tag,
-        'Nº Serie': e.numero_serie,
-        'Qty SAP': e.qty_sap,
-        'Qty EAIM': e.qty_eaim,
-        'Desviación': e.qty_sap - e.qty_eaim,
-        'Cliente': e.cliente_nombre || '—',
-        'Dirección Cliente': e.cliente_direccion || '—',
-        'Estado': LABELS.estado[e.estado] || e.estado,
-        'Fecha Registro': formatDate(e.fecha_registro)
-    }));
+    const rows = APP.equipos.map(e => {
+        const d = new Date(e.fecha_registro || Date.now());
+        const mesNombre = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][d.getMonth()] || 'Junio';
+        const anio = d.getFullYear() || 2026;
+        const dif = e.qty_sap - e.qty_eaim;
+        const clienteStr = e.cliente_nombre ? `${e.cliente_nombre} ${e.cliente_direccion ? '('+e.cliente_direccion+')' : ''}` : '';
+
+        return {
+            'MES': mesNombre,
+            'AÑO': anio,
+            'PLANT': e.plant || '984L',
+            'SLOC': e.ubicacion_actual,
+            'MATERIAL': e.material,
+            'DESCRIPCIÓN MATERIAL': e.nombre,
+            'ASSET TAG': e.asset_tag,
+            'SERIAL NUMBER': e.numero_serie,
+            'QTY SAP': e.qty_sap,
+            'QTY EAIM_ FTS': e.qty_eaim,
+            'DIFERENCIA': dif,
+            'DIFERENCIA_ABS': Math.abs(dif),
+            'EQUIPMENT STATUS': (e.estado || 'disponible').toUpperCase(),
+            'WORK ORDER_ TASK_IN': '',
+            'CLIENTE Y DIRECCIÓN': clienteStr,
+            'SO REGULARIZACIÓN': '',
+            'COMENTARIOS': 'BODEGA'
+        };
+    });
 
     const ws = XLSX.utils.json_to_sheet(rows);
 
     ws['!cols'] = [
-        { wch: 15 }, { wch: 28 }, { wch: 18 }, { wch: 18 },
-        { wch: 18 }, { wch: 20 }, { wch: 10 }, { wch: 10 },
-        { wch: 12 }, { wch: 25 }, { wch: 30 }, { wch: 15 }, { wch: 22 }
+        { wch: 10 }, { wch: 8 }, { wch: 10 }, { wch: 10 },
+        { wch: 14 }, { wch: 45 }, { wch: 15 }, { wch: 18 },
+        { wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 14 },
+        { wch: 18 }, { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 15 }
     ];
 
     const wb = XLSX.utils.book_new();

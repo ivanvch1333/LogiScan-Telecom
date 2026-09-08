@@ -95,6 +95,83 @@ def seed_superuser():
         db.close()
 
 
+REAL_EQUIPOS_DATA = [
+    {"material": "1410059", "nombre": "IP10-E ETH-ONLY SYNCU ACM+ 100M FICHAALI", "asset_tag": "3202249765", "numero_serie": "F463F10074", "marca": "Ceragon", "modelo": "IP10-E", "categoria": models.CategoriaEquipo.ENLACE_RADIO},
+    {"material": "1071074", "nombre": "ROUTER MODULAR SLOTS 2WAN 2FE FAST ETHER", "asset_tag": "3202251704", "numero_serie": "FTX1232Z0FQ", "marca": "Cisco", "modelo": "2FE", "categoria": models.CategoriaEquipo.ROUTER},
+    {"material": "1410593", "nombre": "ECL-RAC30 4XE1/DS-1 TO STM-1/OC3 QPSK TO", "asset_tag": "3202252158", "numero_serie": "EBT0925B218", "marca": "Ceragon", "modelo": "RAC30", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1410593", "nombre": "ECL-RAC30 4XE1/DS-1 TO STM-1/OC3 QPSK TO", "asset_tag": "3202252447", "numero_serie": "EBT0925B263", "marca": "Ceragon", "modelo": "RAC30", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1403138", "nombre": "POWER SUPPLY 120/220-48V 3 2A S-150-48 M", "asset_tag": "3202253797", "numero_serie": "EB35A84313", "marca": "Generic", "modelo": "S-150-48", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1225543", "nombre": "MODULE 1000BASE-LX/LH SFP TRANSCEIVER MO", "asset_tag": "3202294166", "numero_serie": "AGA1743U623", "marca": "Cisco", "modelo": "SFP-1000BASE", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1225543", "nombre": "MODULE 1000BASE-LX/LH SFP TRANSCEIVER MO", "asset_tag": "3202294175", "numero_serie": "AGA1741UBYC", "marca": "Cisco", "modelo": "SFP-1000BASE", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1415083", "nombre": "ME3400E DC POWER SUPPLY ME34X-PWR-DC CSC", "asset_tag": "3202294328", "numero_serie": "LIT16172SUX", "marca": "Cisco", "modelo": "ME3400E", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1102253", "nombre": "COMPACT SWITCH CATALYST 8 ETHERNET 10/10", "asset_tag": "3202296356", "numero_serie": "FOC1606W3A3", "marca": "Cisco", "modelo": "Catalyst 8", "categoria": models.CategoriaEquipo.SWITCH},
+    {"material": "1269461", "nombre": "SRX SERVICES GATEWAY 100 WITH 8XFE PORTS", "asset_tag": "3202296512", "numero_serie": "AT0511AF0389", "marca": "Juniper", "modelo": "SRX100", "categoria": models.CategoriaEquipo.ROUTER},
+    {"material": "1242842", "nombre": "ME3400E ETHERNET ACCESS SWITCH 24 10/100", "asset_tag": "3202297978", "numero_serie": "FCW1914H11L", "marca": "Cisco", "modelo": "ME3400E", "categoria": models.CategoriaEquipo.SWITCH},
+    {"material": "1248234", "nombre": "ME3600X ETHERNET ACCESS SWITCH 24GE SFP", "asset_tag": "3202299162", "numero_serie": "FCW1919H01U", "marca": "Cisco", "modelo": "ME3600X", "categoria": models.CategoriaEquipo.SWITCH},
+    {"material": "1401997", "nombre": "RFU-CXM-F-23-H-TH 01-C23691H2 CGNW", "asset_tag": "3202302496", "numero_serie": "I465530326", "marca": "Ceragon", "modelo": "RFU-CXM", "categoria": models.CategoriaEquipo.ENLACE_RADIO},
+    {"material": "1194109", "nombre": "SWITCH ETHERNET ACCESS 24PORT MANAGED DE", "asset_tag": "3202574027", "numero_serie": "FCW2007H0H4", "marca": "Cisco", "modelo": "ME-3600X", "categoria": models.CategoriaEquipo.SWITCH},
+    {"material": "1248236", "nombre": "ME-3600X/ME3800X DC POWER SUPPLY PWR-ME3", "asset_tag": "3202574028", "numero_serie": "LIT195206MB", "marca": "Cisco", "modelo": "PWR-ME3000", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1403138", "nombre": "POWER SUPPLY 120/220-48V 3 2A S-150-48 M", "asset_tag": "3202574162", "numero_serie": "EB58956515", "marca": "Generic", "modelo": "S-150-48", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1416135", "nombre": "NODE CONTROLLER CARD SERIAL MANAGEMENT V", "asset_tag": "3202576177", "numero_serie": "EBT1628B780", "marca": "Ceragon", "modelo": "Node Controller", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1416135", "nombre": "NODE CONTROLLER CARD SERIAL MANAGEMENT V", "asset_tag": "3202576178", "numero_serie": "EBT1628B786", "marca": "Ceragon", "modelo": "Node Controller", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1420898", "nombre": "NODE PROTECTION CARD HIGH OUTPUT EXS-002", "asset_tag": "3202576213", "numero_serie": "EBT1626A710", "marca": "Ceragon", "modelo": "EXS-002", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1406523", "nombre": "CISCO 880 SERIES INTEGRATED SERVICES ROU", "asset_tag": "3202576505", "numero_serie": "FJC2033L0BW", "marca": "Cisco", "modelo": "880 Series", "categoria": models.CategoriaEquipo.ROUTER},
+    {"material": "1403138", "nombre": "POWER SUPPLY 120/220-48V 3 2A S-150-48 M", "asset_tag": "3202577023", "numero_serie": "EB21150450", "marca": "Generic", "modelo": "S-150-48", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1330376", "nombre": "EX4300 4-PORT 1GBE/10GBE SFP+ UPLINK MOD", "asset_tag": "3202577262", "numero_serie": "MY3716420363", "marca": "Juniper", "modelo": "EX4300", "categoria": models.CategoriaEquipo.SWITCH},
+    {"material": "1410046", "nombre": "IP10-E ETH-ONLY SYNCU POWER SUPPLY ACM L", "asset_tag": "3202578180", "numero_serie": "F463T11985", "marca": "Ceragon", "modelo": "IP10-E", "categoria": models.CategoriaEquipo.ENLACE_RADIO},
+    {"material": "1401373", "nombre": "ME3800X CARRIER ETHERNET SWITCH ROUTER 2", "asset_tag": "3202578441", "numero_serie": "FCW2101H06N", "marca": "Cisco", "modelo": "ME3800X", "categoria": models.CategoriaEquipo.ROUTER},
+    {"material": "1194109", "nombre": "SWITCH ETHERNET ACCESS 24PORT MANAGED DE", "asset_tag": "3202578466", "numero_serie": "FCW2114H1HT", "marca": "Cisco", "modelo": "ME-3600X", "categoria": models.CategoriaEquipo.SWITCH},
+    {"material": "1248236", "nombre": "ME-3600X/ME3800X DC POWER SUPPLY PWR-ME3", "asset_tag": "3202578481", "numero_serie": "QCS2048292M", "marca": "Cisco", "modelo": "PWR-ME3000", "categoria": models.CategoriaEquipo.OTRO},
+    {"material": "1420881", "nombre": "RAC 60E QPSK-256 QAM HIGH GAIN NO XPIC A", "asset_tag": "3202578553", "numero_serie": "EBT1709P659", "marca": "Ceragon", "modelo": "RAC 60E", "categoria": models.CategoriaEquipo.ENLACE_RADIO}
+]
+
+def seed_equipos():
+    """Siembra los 27 equipos reales del inventario de auditoría si la tabla está vacía."""
+    db = next(get_db())
+    try:
+        count = db.query(models.Equipo).count()
+        if count == 0:
+            admin = db.query(models.Usuario).filter(models.Usuario.username == "ectronix_log_amb").first()
+            admin_id = admin.id if admin else 1
+
+            for item in REAL_EQUIPOS_DATA:
+                eq = models.Equipo(
+                    nombre=item["nombre"],
+                    marca=item["marca"],
+                    modelo=item["modelo"],
+                    numero_serie=item["numero_serie"],
+                    plant="984L",
+                    material=item["material"],
+                    asset_tag=item["asset_tag"],
+                    qty_sap=1,
+                    qty_eaim=1,
+                    categoria=item["categoria"],
+                    estado=models.EstadoEquipo.DISPONIBLE,
+                    ubicacion_actual=models.UbicacionNodo.SLOC_2000
+                )
+                db.add(eq)
+                db.commit()
+                db.refresh(eq)
+
+                mov = models.HistorialMovimiento(
+                    equipo_id=eq.id,
+                    usuario_id=admin_id,
+                    tipo_movimiento=models.TipoMovimiento.INGRESO_ALMACEN,
+                    ubicacion_origen=None,
+                    ubicacion_destino=models.UbicacionNodo.SLOC_2000,
+                    observaciones="Carga inicial de inventario auditado - Bodega SLOC 2000"
+                )
+                db.add(mov)
+                db.commit()
+
+            print(f"[OK] {len(REAL_EQUIPOS_DATA)} equipos reales sembrados exitosamente.")
+    except Exception as e:
+        print(f"[ERROR] Error al sembrar equipos: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+
 def ensure_uploads_dir():
     """Crea el directorio de uploads y el config inicial si no existen."""
     os.makedirs(UPLOADS_DIR, exist_ok=True)
@@ -108,6 +185,7 @@ def ensure_uploads_dir():
 def startup_event():
     ensure_uploads_dir()
     seed_superuser()
+    seed_equipos()
 
 
 # ==========================================
