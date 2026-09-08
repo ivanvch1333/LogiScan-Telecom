@@ -451,6 +451,45 @@
                     </form>
                 </div>
 
+                <!-- ======== LOGS DEL SISTEMA Y AUDITORÍA (Admin) ======== -->
+                <div id="view-logs" class="view-section">
+                    <h1 class="section-title text-xl font-bold text-slate-100 mb-6 flex items-center justify-between">
+                        Bitácora de Auditoría y Eventos de Seguridad
+                        <div class="section-actions">
+                            <button class="btn btn-secondary px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs rounded-lg transition-all" onclick="loadLogs()">🔄 Actualizar Logs</button>
+                        </div>
+                    </h1>
+
+                    <div class="filter-bar bg-slate-900/60 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center gap-3 mb-6">
+                        <div class="search-input-wrapper flex-1 min-w-[200px] relative">
+                            <span class="search-icon absolute left-3 top-2.5 text-slate-500 text-sm">🔍</span>
+                            <input type="text" class="search-input w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-emerald-400" id="filter-log-search" placeholder="Buscar por usuario, acción o detalle..." oninput="filterLogs()">
+                        </div>
+                        <select class="form-select px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-300" id="filter-log-nivel" onchange="filterLogs()">
+                            <option value="">Todos los Niveles</option>
+                            <option value="INFO">INFO (Operativo)</option>
+                            <option value="WARNING">WARNING (Advertencia)</option>
+                            <option value="CRITICAL">CRITICAL (Bloqueo / Alerta)</option>
+                        </select>
+                    </div>
+
+                    <div class="data-table-wrapper overflow-x-auto bg-slate-900/60 border border-slate-800 rounded-xl shadow-xl">
+                        <table class="data-table w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-900 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">Fecha / Hora</th>
+                                    <th class="p-3">Usuario</th>
+                                    <th class="p-3">Nivel</th>
+                                    <th class="p-3">Acción</th>
+                                    <th class="p-3">Detalle del Evento</th>
+                                    <th class="p-3">IP Origen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body" class="divide-y divide-slate-800/60"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div><!-- /content-wrapper -->
         </main>
     </div><!-- /app-layout -->

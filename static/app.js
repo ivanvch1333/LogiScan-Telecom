@@ -11,7 +11,14 @@ const APP = {
     user: JSON.parse(localStorage.getItem('teletrack_user') || 'null'),
     config: { nombre_empresa: 'LogiScan Telecom', logo_url: null, banner_url: null },
     equipos: [],
-    usuarios: []
+    usuarios: [],
+    logs: []
+};
+
+const LOG_BADGE = {
+    INFO: 'badge-operativo',
+    WARNING: 'badge-mantenimiento',
+    CRITICAL: 'badge-emergencia'
 };
 
 // ==========================================
@@ -139,6 +146,7 @@ function navigateTo(section) {
         case 'movimientos': loadMovimientos(); break;
         case 'busqueda-qr': loadBusquedaQR(); break;
         case 'usuarios': loadUsuarios(); break;
+        case 'logs': loadLogs(); break;
         case 'ajustes': loadAjustes(); break;
     }
 }
@@ -169,14 +177,16 @@ function initLoginForm() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const errorEl = document.getElementById('login-error');
-        errorEl.classList.remove('show');
+        errorEl.classList.add('hidden');
+        errorEl.classList.remove('show', 'block');
 
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
 
         if (!username || !password) {
-            errorEl.textContent = 'Ingrese usuario y contraseña';
-            errorEl.classList.add('show');
+            errorEl.innerHTML = '<div class="flex items-center gap-2"><span>⚠️</span><span>Ingrese su usuario y contraseña</span></div>';
+            errorEl.classList.remove('hidden');
+            errorEl.classList.add('block');
             return;
         }
 
@@ -193,8 +203,13 @@ function initLoginForm() {
 
             initApp();
         } catch (err) {
-            errorEl.textContent = err.message || 'Error al iniciar sesión';
-            errorEl.classList.add('show');
+            const msg = err.message || 'Error al iniciar sesión';
+            errorEl.innerHTML = `<div class="flex items-start gap-2 text-left">
+                <span class="text-base leading-none mt-0.5">🚨</span>
+                <div class="flex-1">${msg}</div>
+            </div>`;
+            errorEl.classList.remove('hidden');
+            errorEl.classList.add('block');
         }
     });
 }
@@ -295,6 +310,9 @@ function buildSidebar() {
             <div class="nav-section-label">Administración</div>
             <div class="nav-item" data-section="usuarios" onclick="navigateTo('usuarios')">
                 <span class="nav-icon">👥</span> Usuarios
+            </div>
+            <div class="nav-item" data-section="logs" onclick="navigateTo('logs')">
+                <span class="nav-icon">📜</span> Logs del Sistema
             </div>
             <div class="nav-item" data-section="ajustes" onclick="navigateTo('ajustes')">
                 <span class="nav-icon">⚙️</span> Ajustes
@@ -935,6 +953,49 @@ async function submitConfig(e) {
             showToast('Configuración actualizada');
         }
     } catch {}
+}
+
+// ==========================================
+// LOGS Y AUDITORÍA DEL SISTEMA (Admin)
+// ==========================================
+async function loadLogs() {
+    try {
+        APP.logs = await api('GET', '/api/logs') || [];
+    } catch { APP.logs = []; }
+    renderLogsTable(APP.logs);
+}
+
+function filterLogs() {
+    const search = document.getElementById('filter-log-search').value.toLowerCase();
+    const nivel = document.getElementById('filter-log-nivel').value;
+
+    let filtered = APP.logs;
+    if (nivel) filtered = filtered.filter(l => l.nivel === nivel);
+    if (search) filtered = filtered.filter(l =>
+        (l.usuario_username && l.usuario_username.toLowerCase().includes(search)) ||
+        l.accion.toLowerCase().includes(search) ||
+        l.detalle.toLowerCase().includes(search)
+    );
+    renderLogsTable(filtered);
+}
+
+function renderLogsTable(logs) {
+    const container = document.getElementById('logs-table-body');
+    if (!logs || logs.length === 0) {
+        container.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📜</div><div class="empty-state-title">No hay registros de auditoría</div></div></td></tr>';
+        return;
+    }
+
+    container.innerHTML = logs.map(l => `
+        <tr>
+            <td style="white-space:nowrap;font-size:0.8rem;color:var(--text-secondary);">${formatDate(l.fecha)}</td>
+            <td><strong>${l.usuario_username || 'Sistema / Anon'}</strong></td>
+            <td><span class="badge ${LOG_BADGE[l.nivel] || 'badge-operativo'}">${l.nivel}</span></td>
+            <td><code>${l.accion}</code></td>
+            <td style="font-size:0.85rem;">${l.detalle}</td>
+            <td><code>${l.ip_origen || '127.0.0.1'}</code></td>
+        </tr>
+    `).join('');
 }
 
 // ==========================================

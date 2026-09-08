@@ -1,7 +1,8 @@
 import os
 import json
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
-from fastapi import FastAPI, Depends, HTTPException, status, Query, File, UploadFile, Form
+from fastapi import FastAPI, Depends, HTTPException, status, Query, File, UploadFile, Form, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,6 +39,34 @@ CONFIG_FILE = os.path.join(UPLOADS_DIR, "config.json")
 
 
 # ==========================================
+# HELPER DE AUDITORÍA Y LOGS DEL SISTEMA
+# ==========================================
+
+def registrar_log(
+    db: Session,
+    usuario_username: Optional[str],
+    nivel: models.NivelLog,
+    accion: str,
+    detalle: str,
+    ip_origen: Optional[str] = None
+):
+    """Registra una entrada en la bitácora de auditoría de seguridad del sistema."""
+    try:
+        nuevo_log = models.LogSistema(
+            usuario_username=usuario_username,
+            nivel=nivel,
+            accion=accion,
+            detalle=detalle,
+            ip_origen=ip_origen
+        )
+        db.add(nuevo_log)
+        db.commit()
+    except Exception as e:
+        print(f"[ERROR LOG] No se pudo guardar el log: {e}")
+        db.rollback()
+
+
+# ==========================================
 # SEMBRADO AUTOMÁTICO DEL SUPERUSUARIO
 # ==========================================
 
@@ -57,6 +86,7 @@ def seed_superuser():
             )
             db.add(admin)
             db.commit()
+            registrar_log(db, "SISTEMA", models.NivelLog.INFO, "SUPERUSUARIO_SEMBRADO", "Superusuario ectronix_log_amb creado por defecto.")
             print("[OK] Superusuario creado: ectronix_log_amb / Macara@13")
     except Exception as e:
         print(f"[ERROR] Error al crear superusuario: {e}")
@@ -87,15 +117,20 @@ def startup_event():
 @app.post("/api/usuarios/registro", response_model=schemas.UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def registrar_usuario(
     usuario: schemas.UsuarioCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(security.get_current_admin)
 ):
     """Registra un nuevo usuario. Solo administradores pueden crear usuarios."""
+    ip = request.client.host if request.client else "127.0.0.1"
+    
     # Verificar username único
     if db.query(models.Usuario).filter(models.Usuario.username == usuario.username).first():
+        registrar_log(db, current_user.username, models.NivelLog.WARNING, "REGISTRO_FALLIDO", f"Intento de registro duplicado con usuario '{usuario.username}'", ip)
         raise HTTPException(status_code=400, detail="El nombre de usuario ya está en uso.")
     # Verificar email único
     if db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first():
+        registrar_log(db, current_user.username, models.NivelLog.WARNING, "REGISTRO_FALLIDO", f"Intento de registro duplicado con correo '{usuario.email}'", ip)
         raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
     
     hashed_password = security.get_password_hash(usuario.password)
@@ -109,22 +144,84 @@ def registrar_usuario(
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)
+
+    registrar_log(db, current_user.username, models.NivelLog.INFO, "USUARIO_CREADO", f"Usuario '{nuevo_usuario.username}' ({nuevo_usuario.rol.value}) creado por {current_user.username}", ip)
     return nuevo_usuario
 
 
 @app.post("/api/usuarios/login", response_model=schemas.Token)
-def login(credentials: schemas.UsuarioLogin, db: Session = Depends(get_db)):
-    """Inicia sesión con nombre de usuario y contraseña, genera un token JWT."""
+def login(credentials: schemas.UsuarioLogin, request: Request, db: Session = Depends(get_db)):
+    """Inicia sesión con control de bloqueo progresivo por intentos fallidos."""
+    ip = request.client.host if request.client else "127.0.0.1"
+    now = datetime.now(timezone.utc)
+
     user = db.query(models.Usuario).filter(models.Usuario.username == credentials.username).first()
-    if not user or not security.verify_password(credentials.password, user.hashed_password):
+
+    if user:
+        # Verificar si la cuenta se encuentra bloqueada temporalmente
+        if user.bloqueado_hasta and user.bloqueado_hasta > now:
+            tiempo_restante = user.bloqueado_hasta - now
+            minutos = int(tiempo_restante.total_seconds() // 60)
+            segundos = int(tiempo_restante.total_seconds() % 60)
+            msg_tiempo = f"{minutos} min {segundos} seg" if minutos > 0 else f"{segundos} segundos"
+            
+            detalle_err = f"Cuenta congelada por intentos fallidos. Intente nuevamente en {msg_tiempo}."
+            registrar_log(db, user.username, models.NivelLog.CRITICAL, "ACCESO_BLOQUEADO", f"Intento de ingreso a cuenta bloqueada ({user.username}). Tiempo restante: {msg_tiempo}", ip)
+            
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=detalle_err,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Si el usuario no está bloqueado pero la contraseña es incorrecta
+        if not security.verify_password(credentials.password, user.hashed_password):
+            user.intentos_fallidos += 1
+            
+            # Umbrales de bloqueo: 3 intentos -> 3 min, 5 intentos -> 10 min, 10 intentos -> 60 min
+            minutos_bloqueo = 0
+            if user.intentos_fallidos >= 10:
+                minutos_bloqueo = 60
+            elif user.intentos_fallidos >= 5:
+                minutos_bloqueo = 10
+            elif user.intentos_fallidos >= 3:
+                minutos_bloqueo = 3
+
+            if minutos_bloqueo > 0:
+                user.bloqueado_hasta = now + timedelta(minutes=minutos_bloqueo)
+                db.commit()
+                
+                detalle_err = f"Acceso denegado. Se han registrado {user.intentos_fallidos} intentos fallidos. Cuenta bloqueada por {minutos_bloqueo} minutos."
+                registrar_log(db, user.username, models.NivelLog.CRITICAL, "BLOQUEO_CUENTA", f"Cuenta de '{user.username}' bloqueada por {minutos_bloqueo} minutos ({user.intentos_fallidos} intentos fallidos)", ip)
+            else:
+                db.commit()
+                intentos_restantes = 3 - user.intentos_fallidos
+                detalle_err = f"Usuario o contraseña incorrectos. Intento {user.intentos_fallidos} de 3 antes de bloqueo temporal."
+                registrar_log(db, user.username, models.NivelLog.WARNING, "LOGIN_FALLIDO", f"Intento fallido #{user.intentos_fallidos} para usuario '{user.username}'", ip)
+
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=detalle_err,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Contraseña correcta: Resetear contador de fallos y desbloquear
+        user.intentos_fallidos = 0
+        user.bloqueado_hasta = None
+        db.commit()
+
+        access_token = security.create_access_token(data={"sub": user.username, "rol": user.rol.value})
+        registrar_log(db, user.username, models.NivelLog.INFO, "LOGIN_EXITOSO", f"Inicio de sesión exitoso de '{user.username}' ({user.rol.value})", ip)
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    else:
+        # El usuario no existe en la BD
+        registrar_log(db, credentials.username, models.NivelLog.WARNING, "LOGIN_USUARIO_INEXISTENTE", f"Intento de login con usuario inexistente '{credentials.username}'", ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuario o contraseña incorrectos",
+            detail="Usuario o contraseña incorrectos.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    access_token = security.create_access_token(data={"sub": user.username, "rol": user.rol.value})
-    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.get("/api/usuarios/me", response_model=schemas.UsuarioResponse)
@@ -146,35 +243,47 @@ def listar_usuarios(
 def actualizar_rol_usuario(
     usuario_id: int,
     datos: schemas.UsuarioUpdateRol,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(security.get_current_admin)
 ):
     """Actualiza el rol de un usuario. Solo administradores."""
+    ip = request.client.host if request.client else "127.0.0.1"
     usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado.")
     if usuario.id == current_user.id:
         raise HTTPException(status_code=400, detail="No puede cambiar su propio rol.")
+    
+    rol_anterior = usuario.rol.value
     usuario.rol = datos.rol
     db.commit()
     db.refresh(usuario)
+
+    registrar_log(db, current_user.username, models.NivelLog.INFO, "ROL_ACTUALIZADO", f"Rol de '{usuario.username}' cambiado de {rol_anterior} a {usuario.rol.value} por {current_user.username}", ip)
     return usuario
 
 
 @app.delete("/api/usuarios/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_usuario(
     usuario_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(security.get_current_admin)
 ):
     """Elimina un usuario del sistema. Solo administradores."""
+    ip = request.client.host if request.client else "127.0.0.1"
     usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado.")
     if usuario.id == current_user.id:
         raise HTTPException(status_code=400, detail="No puede eliminarse a sí mismo.")
+    
+    username_eliminado = usuario.username
     db.delete(usuario)
     db.commit()
+
+    registrar_log(db, current_user.username, models.NivelLog.WARNING, "USUARIO_ELIMINADO", f"Usuario '{username_eliminado}' eliminado por {current_user.username}", ip)
 
 
 # ==========================================
@@ -193,25 +302,25 @@ def obtener_config():
 
 @app.post("/api/config", response_model=schemas.ConfigResponse)
 async def actualizar_config(
+    request: Request,
     nombre_empresa: str = Form(None),
     logo: UploadFile = File(None),
     banner: UploadFile = File(None),
+    db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(security.get_current_admin)
 ):
     """Actualiza la configuración de marca. Solo administradores."""
+    ip = request.client.host if request.client else "127.0.0.1"
     os.makedirs(UPLOADS_DIR, exist_ok=True)
     
-    # Leer config actual
     config = {"nombre_empresa": "LogiScan Telecom", "logo_url": None, "banner_url": None}
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             config = json.load(f)
     
-    # Actualizar nombre
     if nombre_empresa is not None:
         config["nombre_empresa"] = nombre_empresa
     
-    # Guardar logo
     if logo and logo.filename:
         ext = os.path.splitext(logo.filename)[1] or ".png"
         logo_path = os.path.join(UPLOADS_DIR, f"logo{ext}")
@@ -220,7 +329,6 @@ async def actualizar_config(
             f.write(content)
         config["logo_url"] = f"/static/uploads/logo{ext}"
     
-    # Guardar banner
     if banner and banner.filename:
         ext = os.path.splitext(banner.filename)[1] or ".png"
         banner_path = os.path.join(UPLOADS_DIR, f"banner{ext}")
@@ -229,10 +337,10 @@ async def actualizar_config(
             f.write(content)
         config["banner_url"] = f"/static/uploads/banner{ext}"
     
-    # Guardar config
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False)
     
+    registrar_log(db, current_user.username, models.NivelLog.INFO, "CONFIGURACION_ACTUALIZADA", f"Marca actualizada por {current_user.username} (Nombre: {config['nombre_empresa']})", ip)
     return config
 
 
@@ -252,7 +360,7 @@ def listar_equipos(
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(security.get_current_user)
 ):
-    """Obtiene el listado de equipos con filtros avanzados (Planta, SLOC, Estado, Mes, Año, Serie)."""
+    """Obtiene el listado de equipos con filtros avanzados."""
     query = db.query(models.Equipo)
     if categoria:
         query = query.filter(models.Equipo.categoria == categoria)
@@ -275,10 +383,13 @@ def listar_equipos(
 @app.post("/api/equipos", response_model=schemas.EquipoResponse, status_code=status.HTTP_201_CREATED)
 def registrar_equipo(
     equipo: schemas.EquipoCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(security.get_current_user)
 ):
     """Registra un nuevo equipo de telecomunicaciones en el inventario."""
+    ip = request.client.host if request.client else "127.0.0.1"
+    
     existente_serie = db.query(models.Equipo).filter(models.Equipo.numero_serie == equipo.numero_serie).first()
     if existente_serie:
         raise HTTPException(status_code=400, detail="Ya existe un equipo con ese número de serie (Serial Number).")
@@ -292,7 +403,6 @@ def registrar_equipo(
     db.commit()
     db.refresh(nuevo_equipo)
     
-    # Registrar el movimiento inicial
     movimiento_inicial = models.HistorialMovimiento(
         equipo_id=nuevo_equipo.id,
         usuario_id=current_user.id,
@@ -306,6 +416,7 @@ def registrar_equipo(
     db.add(movimiento_inicial)
     db.commit()
     
+    registrar_log(db, current_user.username, models.NivelLog.INFO, "EQUIPO_REGISTRADO", f"Equipo '{nuevo_equipo.nombre}' (SN: {nuevo_equipo.numero_serie}, Tag: {nuevo_equipo.asset_tag}) registrado por {current_user.username}", ip)
     return nuevo_equipo
 
 
@@ -331,7 +442,6 @@ def generar_codigo_qr(equipo_id: int, db: Session = Depends(get_db)):
     if not equipo:
         raise HTTPException(status_code=404, detail="Equipo no encontrado.")
     
-    # El contenido del QR incluye la serie para consulta directa
     qr_data = equipo.numero_serie
     img = qrcode.make(qr_data)
     
@@ -349,17 +459,17 @@ def generar_codigo_qr(equipo_id: int, db: Session = Depends(get_db)):
 @app.post("/api/movimientos", response_model=schemas.HistorialResponse, status_code=status.HTTP_201_CREATED)
 def registrar_movimiento(
     movimiento: schemas.HistorialCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(security.get_current_user)
 ):
     """Registra una transferencia o cambio de estado de un equipo."""
+    ip = request.client.host if request.client else "127.0.0.1"
     equipo = db.query(models.Equipo).filter(models.Equipo.id == movimiento.equipo_id).first()
     if not equipo:
         raise HTTPException(status_code=404, detail="Equipo no encontrado.")
     
     ubicacion_origen = equipo.ubicacion_actual
-    
-    # Actualizar estado, ubicación del equipo y datos del cliente si es instalación
     equipo.ubicacion_actual = movimiento.ubicacion_destino
     if movimiento.nuevo_estado:
         equipo.estado = movimiento.nuevo_estado
@@ -368,7 +478,6 @@ def registrar_movimiento(
         equipo.cliente_nombre = movimiento.cliente_nombre
         equipo.cliente_direccion = movimiento.cliente_direccion
     else:
-        # Si se mueve a una ubicación técnica/almacén se desvincula el cliente activo del equipo
         if movimiento.ubicacion_destino in [schemas.UbicacionNodo.SLOC_1000, schemas.UbicacionNodo.SLOC_2000, schemas.UbicacionNodo.SLOC_1010, schemas.UbicacionNodo.ALMACEN_CENTRAL]:
             equipo.cliente_nombre = None
             equipo.cliente_direccion = None
@@ -387,6 +496,12 @@ def registrar_movimiento(
     db.add(nuevo_registro)
     db.commit()
     db.refresh(nuevo_registro)
+
+    det = f"Movimiento {movimiento.tipo_movimiento.value} en equipo '{equipo.nombre}' hacia {movimiento.ubicacion_destino.value}"
+    if movimiento.cliente_nombre:
+        det += f" (Cliente: {movimiento.cliente_nombre})"
+    registrar_log(db, current_user.username, models.NivelLog.INFO, "MOVIMIENTO_REGISTRADO", det, ip)
+
     return nuevo_registro
 
 
@@ -405,10 +520,33 @@ def obtener_historial_equipo(
 
 
 # ==========================================
+# RUTAS DE AUDITORÍA Y LOGS DEL SISTEMA
+# ==========================================
+
+@app.get("/api/logs", response_model=List[schemas.LogResponse])
+def listar_logs_sistema(
+    nivel: Optional[models.NivelLog] = None,
+    buscar: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.Usuario = Depends(security.get_current_admin)
+):
+    """Consulta la bitácora de auditoría y eventos de seguridad. Solo administradores."""
+    query = db.query(models.LogSistema)
+    if nivel:
+        query = query.filter(models.LogSistema.nivel == nivel)
+    if buscar:
+        query = query.filter(
+            (models.LogSistema.usuario_username.ilike(f"%{buscar}%")) |
+            (models.LogSistema.accion.ilike(f"%{buscar}%")) |
+            (models.LogSistema.detalle.ilike(f"%{buscar}%"))
+        )
+    return query.order_by(models.LogSistema.fecha.desc()).limit(200).all()
+
+
+# ==========================================
 # SERVICIO DE ARCHIVOS ESTÁTICOS Y FRONTEND
 # ==========================================
 
-# Montar carpeta estática si existe
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 

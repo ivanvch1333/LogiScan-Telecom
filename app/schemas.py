@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
 
 # Importar las enumeraciones desde el modelo
-from app.models import RolUsuario, CategoriaEquipo, EstadoEquipo, UbicacionNodo, TipoMovimiento
+from app.models import RolUsuario, CategoriaEquipo, EstadoEquipo, UbicacionNodo, TipoMovimiento, NivelLog
 
 
 # ==========================================
@@ -38,6 +38,8 @@ class UsuarioCreate(UsuarioBase):
 
 class UsuarioResponse(UsuarioBase):
     id: int
+    intentos_fallidos: Optional[int] = 0
+    bloqueado_hasta: Optional[datetime] = None
     fecha_creacion: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -137,3 +139,19 @@ class ConfigResponse(BaseModel):
     nombre_empresa: str
     logo_url: Optional[str] = None
     banner_url: Optional[str] = None
+
+
+# ==========================================
+# ESQUEMAS PARA LOGS DEL SISTEMA Y AUDITORÍA
+# ==========================================
+
+class LogResponse(BaseModel):
+    id: int
+    usuario_username: Optional[str] = None
+    nivel: NivelLog
+    accion: str
+    detalle: str
+    ip_origen: Optional[str] = None
+    fecha: datetime
+
+    model_config = ConfigDict(from_attributes=True)

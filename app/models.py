@@ -46,6 +46,12 @@ class TipoMovimiento(str, enum.Enum):
     REEMPLAZO_EMERGENCIA = "reemplazo_emergencia"
 
 
+class NivelLog(str, enum.Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    CRITICAL = "CRITICAL"
+
+
 # ==========================================
 # MODELOS DE BASE DE DATOS
 # ==========================================
@@ -59,6 +65,8 @@ class Usuario(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     rol = Column(Enum(RolUsuario), default=RolUsuario.TECNICO)
+    intentos_fallidos = Column(Integer, default=0, nullable=False)
+    bloqueado_hasta = Column(DateTime(timezone=True), nullable=True)
     fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
 
     movimientos = relationship("HistorialMovimiento", back_populates="usuario")
@@ -110,3 +118,15 @@ class HistorialMovimiento(Base):
 
     equipo = relationship("Equipo", back_populates="historial")
     usuario = relationship("Usuario", back_populates="movimientos")
+
+
+class LogSistema(Base):
+    __tablename__ = "logs_sistema"
+
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_username = Column(String(50), nullable=True, index=True)
+    nivel = Column(Enum(NivelLog), default=NivelLog.INFO, nullable=False)
+    accion = Column(String(100), nullable=False, index=True)
+    detalle = Column(Text, nullable=False)
+    ip_origen = Column(String(50), nullable=True)
+    fecha = Column(DateTime(timezone=True), server_default=func.now())
