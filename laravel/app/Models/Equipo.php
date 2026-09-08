@@ -35,7 +35,7 @@ class Equipo extends Model
 
     public function getDesviacionAttribute()
     {
-        return $this->qty_sap - $this->qty_eaim;
+        return $this->qty_eaim - $this->qty_sap;
     }
 
     /**

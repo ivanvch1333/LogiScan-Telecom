@@ -486,7 +486,7 @@ function renderEquiposTable(equipos) {
     }
 
     container.innerHTML = equipos.map(e => {
-        const dev = e.qty_sap - e.qty_eaim;
+        const dev = e.qty_eaim - e.qty_sap;
         const slocDisplay = LABELS.ubicacion[e.ubicacion_actual] || e.ubicacion_actual;
         return `
         <tr>
@@ -500,9 +500,9 @@ function renderEquiposTable(equipos) {
             <td>${slocDisplay}</td>
             <td><code>${e.asset_tag}</code></td>
             <td><code>${e.numero_serie}</code></td>
-            <td>${e.qty_sap}</td>
-            <td>${e.qty_eaim}</td>
-            <td style="font-weight:700;color:${dev !== 0 ? 'var(--color-emergencia)' : 'var(--color-operativo)'}">${dev}</td>
+            <td class="text-center font-bold">${e.qty_sap}</td>
+            <td class="text-center font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded px-2 py-1">${e.qty_eaim}</td>
+            <td class="text-center" style="font-weight:700;color:${dev !== 0 ? 'var(--color-emergencia)' : 'var(--color-operativo)'}">${dev}</td>
             <td><span class="badge ${ESTADO_BADGE[e.estado]}">${LABELS.estado[e.estado]}</span></td>
             <td>
                 <div class="table-actions">

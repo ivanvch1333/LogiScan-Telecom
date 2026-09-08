@@ -94,7 +94,7 @@ class EquipoResponse(EquipoBase):
     @classmethod
     def model_validate(cls, obj, **kwargs):
         instance = super().model_validate(obj, **kwargs)
-        instance.desviacion = instance.qty_sap - instance.qty_eaim
+        instance.desviacion = instance.qty_eaim - instance.qty_sap
         return instance
 
 
