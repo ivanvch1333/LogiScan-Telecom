@@ -599,23 +599,23 @@ async function submitNewEquipo(e) {
     const form = e.target;
     const body = {
         nombre: form.nombre.value.trim(),
-        marca: form.marca.value.trim(),
-        modelo: form.modelo.value.trim(),
+        marca: form.marca.value.trim() || 'Generico',
+        modelo: form.modelo.value.trim() || 'Standard',
         numero_serie: form.numero_serie.value.trim(),
-        plant: form.plant.value.trim(),
+        plant: form.plant.value.trim() || '984L',
         material: form.material.value.trim(),
         asset_tag: form.asset_tag.value.trim(),
-        qty_sap: parseInt(form.qty_sap.value),
-        qty_eaim: parseInt(form.qty_eaim.value),
+        qty_sap: parseInt(form.qty_sap.value || '1'),
+        qty_eaim: parseInt(form.qty_eaim.value || '1'),
         cliente_nombre: form.cliente_nombre.value.trim() || null,
         cliente_direccion: form.cliente_direccion.value.trim() || null,
-        categoria: form.categoria.value,
+        categoria: form.categoria.value || 'otro',
         estado: form.estado.value || 'disponible',
-        ubicacion_actual: form.ubicacion_actual.value || 'Almacén Central'
+        ubicacion_actual: form.ubicacion_actual.value || '2000'
     };
 
-    if (!body.nombre || !body.marca || !body.modelo || !body.numero_serie || !body.categoria || !body.plant || !body.material || !body.asset_tag) {
-        showToast('Complete todos los campos obligatorios', 'error');
+    if (!body.nombre || !body.numero_serie || !body.material || !body.asset_tag) {
+        showToast('Complete los campos obligatorios (*) Material, Nombre, Asset Tag y Nº Serie', 'error');
         return;
     }
 

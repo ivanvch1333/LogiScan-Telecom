@@ -501,103 +501,116 @@
     <!-- Modal: Nuevo Equipo -->
     <div id="new-equipo-modal" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] hidden items-center justify-center p-4">
         <div class="modal modal-lg bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="modal-header px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-                <h2 class="modal-title font-bold text-lg text-slate-100">Registrar Activo en Inventario</h2>
+            <div class="modal-header px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 sticky top-0 z-10">
+                <h2 class="modal-title font-bold text-lg text-slate-100 flex items-center gap-2">
+                    <span>📦</span> Registrar Activo en Inventario Bodega
+                </h2>
                 <button class="modal-close text-slate-400 hover:text-slate-100 text-xl" onclick="closeAllModals()">×</button>
             </div>
             <div class="modal-body p-6">
                 <form id="new-equipo-form" onsubmit="submitNewEquipo(event)" class="space-y-4">
+
+                    <!-- Fila 1: Material & Descripción -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nombre / Descripción del Equipo *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="nombre" placeholder="Ej: Router Huawei NetEngine 8000" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">CÓDIGO MATERIAL SAP *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 focus:border-emerald-400" name="material" placeholder="Ej: 1410059" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Código Material SAP *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="material" placeholder="Ej: MAT-RT-HW8K" required>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nº Serie *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="numero_serie" placeholder="Ej: SN-2026-00987" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Asset Tag (Placa Activo) *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="asset_tag" placeholder="Ej: PLA-EC-998811" required>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Marca *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="marca" placeholder="Ej: Huawei" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Modelo *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="modelo" placeholder="Ej: NE8000" required>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Plant (Planta SAP) *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="plant" placeholder="Ej: Planta Latacunga" value="Planta Latacunga" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">SLOC (Storage Location / Ubicación) *</label>
-                            <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="ubicacion_actual" id="new-equipo-sloc" required>
-                                <option value="Almacén Central">Almacén Central</option>
-                                <option value="1000">1000</option>
-                                <option value="2000">2000</option>
-                                <option value="1010">1010</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Apartado opcional de datos de cliente al registrar si ya está instalado -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="new-equipo-cliente-fields" style="border-left:3px solid var(--accent-secondary); padding-left:1rem;">
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nombre del Cliente (Si aplica)</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="cliente_nombre" placeholder="Nombre completo o Empresa">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Dirección del Cliente (Si aplica)</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="cliente_direccion" placeholder="Dirección del domicilio / nodo">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">DESCRIPCIÓN MATERIAL (NOMBRE) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 focus:border-emerald-400" name="nombre" placeholder="Ej: IP10-E ETH-ONLY SYNCU ACM+" required>
                         </div>
                     </div>
 
+                    <!-- Fila 2: Asset Tag & Serial Number -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Cantidad Teórica (Qty SAP) *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" type="number" name="qty_sap" value="1" min="0" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">ASSET TAG (PLACA ACTIVO) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 focus:border-emerald-400" name="asset_tag" placeholder="Ej: 3202249765" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Cantidad Física Real (Qty EAIM) *</label>
-                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" type="number" name="qty_eaim" value="0" min="0" required>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">SERIAL NUMBER (Nº SERIE) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 focus:border-emerald-400" name="numero_serie" placeholder="Ej: F463F10074" required>
                         </div>
                     </div>
+
+                    <!-- Fila 3: Plant & SLOC -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Categoría *</label>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">PLANT (PLANTA SAP) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 focus:border-emerald-400" name="plant" placeholder="Ej: 984L" value="984L" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">SLOC (STORAGE LOCATION / UBICACIÓN) *</label>
+                            <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="ubicacion_actual" id="new-equipo-sloc" required>
+                                <option value="2000">2000</option>
+                                <option value="1000">1000</option>
+                                <option value="1010">1010</option>
+                                <option value="Almacén Central">Almacén Central</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fila 4: Cantidades SAP & EAIM -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">QTY SAP (CANTIDAD TEÓRICA) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-100" type="number" name="qty_sap" value="1" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-emerald-400 uppercase tracking-wider block mb-1">QTY EAIM_ FTS (CANTIDAD FÍSICA REAL) *</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-900 border border-emerald-500/50 rounded-lg text-sm text-emerald-300 font-bold" type="number" name="qty_eaim" value="1" min="0" required>
+                        </div>
+                    </div>
+
+                    <!-- Fila 5: Categoría & Estado -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">CATEGORÍA *</label>
                             <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="categoria" required>
-                                <option value="">-- Seleccionar --</option>
                                 <option value="router">Router</option>
                                 <option value="switch">Switch</option>
                                 <option value="olt">OLT</option>
                                 <option value="edfa">EDFA</option>
                                 <option value="enlace_radio">Enlace Radio</option>
-                                <option value="otro">Otro</option>
+                                <option value="otro">Otro / Módulo</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Estado Conciliación</label>
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">EQUIPMENT STATUS (ESTADO) *</label>
                             <select class="form-select w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="estado">
-                                <option value="disponible">Disponible</option>
-                                <option value="asignado">Asignado</option>
-                                <option value="en_mantenimiento">En Mantenimiento</option>
-                                <option value="baja">De Baja</option>
+                                <option value="disponible">DISPONIBLE</option>
+                                <option value="asignado">ASIGNADO</option>
+                                <option value="en_mantenimiento">EN MANTENIMIENTO</option>
+                                <option value="baja">DE BAJA</option>
                             </select>
                         </div>
                     </div>
+
+                    <!-- Fila 6: Marca y Modelo (Opcionales) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">MARCA (Opcional)</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="marca" placeholder="Ej: Ceragon / Cisco">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">MODELO (Opcional)</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="modelo" placeholder="Ej: IP10-E">
+                        </div>
+                    </div>
+                    
+                    <!-- Fila 7: Datos de Cliente (Opcional) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-l-2 border-indigo-500 pl-3">
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">CLIENTE Y DIRECCIÓN (Si aplica)</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="cliente_nombre" placeholder="Nombre de cliente o empresa">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">DIRECCIÓN NODAL / COMENTARIOS</label>
+                            <input class="form-input w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100" name="cliente_direccion" placeholder="Ej: BODEGA / Dirección instalación">
+                        </div>
+                    </div>
+
                     <div class="modal-footer flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
                         <button type="button" class="btn btn-secondary px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg" onclick="closeAllModals()">Cancelar</button>
                         <button type="submit" class="btn btn-primary px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-lg shadow-md shadow-emerald-500/20">Registrar Activo</button>
