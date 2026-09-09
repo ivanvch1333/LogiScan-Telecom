@@ -37,7 +37,7 @@
     </script>
 
     <!-- Hojas de Estilo del Proyecto (Integración SASS) -->
-    <link rel="stylesheet" href="/static/style.css?v=2.3">
+    <link rel="stylesheet" href="/static/style.css?v=2.4">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
 </head>
 <body class="bg-[hsl(220,25%,8%)] text-slate-100 font-inter min-h-screen antialiased selection:bg-emerald-500 selection:text-slate-950">
@@ -77,44 +77,44 @@
     <!-- ==========================================
          APP LAYOUT
          ========================================== -->
-    <div id="app-layout" class="app-layout hidden min-h-screen flex flex-col md:flex-row">
+    <div id="app-layout" class="app-layout hidden">
 
         <!-- Mobile sidebar toggle -->
-        <button class="sidebar-toggle md:hidden fixed top-3 left-3 z-50 p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200" onclick="toggleSidebar()">☰</button>
-        <div class="sidebar-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden" onclick="toggleSidebar()"></div>
+        <button class="sidebar-toggle md:hidden" onclick="toggleSidebar()">☰</button>
+        <div class="sidebar-overlay hidden" onclick="toggleSidebar()"></div>
 
         <!-- SIDEBAR -->
-        <aside class="sidebar fixed md:static inset-y-0 left-0 z-50 w-64 bg-[hsl(230,25%,11%)] border-r border-slate-800 flex flex-col transition-transform duration-300">
-            <div class="sidebar-header p-5 border-b border-slate-800 flex items-center gap-3">
-                <div class="sidebar-logo flex items-center gap-3">
-                    <img id="sidebar-logo-img" src="" alt="Logo" class="max-h-8" style="display:none;">
-                    <span id="sidebar-logo-text" class="sidebar-logo-text font-bold text-lg text-slate-100 tracking-tight">LogiScan Telecom</span>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img id="sidebar-logo-img" src="" alt="Logo" style="display:none;">
+                    <span id="sidebar-logo-text" class="sidebar-logo-text">LogiScan Telecom</span>
                 </div>
             </div>
-            <nav id="sidebar-nav" class="sidebar-nav flex-1 p-4 space-y-1 overflow-y-auto">
+            <nav id="sidebar-nav" class="sidebar-nav">
                 <!-- Nav items are built dynamically by JS -->
             </nav>
-            <div class="sidebar-footer p-4 border-t border-slate-800">
-                <div class="sidebar-user flex items-center justify-between gap-3">
-                    <div id="sidebar-avatar" class="user-avatar w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center border border-emerald-500/30">A</div>
-                    <div class="sidebar-user-info flex-1 min-w-0">
-                        <div id="sidebar-user-name" class="sidebar-user-name text-sm font-semibold text-slate-200 truncate">—</div>
-                        <div id="sidebar-user-role" class="sidebar-user-role text-xs text-slate-400 truncate">—</div>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div id="sidebar-avatar" class="user-avatar">A</div>
+                    <div class="sidebar-user-info">
+                        <div id="sidebar-user-name" class="sidebar-user-name">—</div>
+                        <div id="sidebar-user-role" class="sidebar-user-role">—</div>
                     </div>
-                    <button class="btn-logout text-slate-400 hover:text-red-400 p-1.5 transition-colors" onclick="logout()" title="Cerrar sesión">⏻</button>
+                    <button class="btn-logout" onclick="logout()" title="Cerrar sesión">⏻</button>
                 </div>
             </div>
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="main-content flex-1 flex flex-col min-w-0 bg-[hsl(220,25%,8%)]">
+        <main class="main-content">
             <!-- Top Bar -->
-            <div class="top-bar h-16 border-b border-slate-800 px-6 flex items-center justify-between bg-slate-900/40 backdrop-blur-md">
-                <div class="top-bar-left flex items-center gap-3">
-                    <span id="top-bar-company" class="top-bar-title font-semibold text-slate-200 text-sm md:text-base">LogiScan Telecom</span>
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <span id="top-bar-company" class="top-bar-title">LogiScan Telecom</span>
                 </div>
-                <div class="top-bar-right flex items-center gap-4">
-                    <span id="top-bar-user" class="top-bar-user text-xs text-slate-400 font-medium"></span>
+                <div class="top-bar-right">
+                    <span id="top-bar-user" class="top-bar-user"></span>
                 </div>
             </div>
 
@@ -692,6 +692,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="/static/app.js?v=2.3"></script>
+    <script src="/static/app.js?v=2.4"></script>
 </body>
 </html>

@@ -235,7 +235,11 @@ img { max-width: 100%; height: auto; }
    ========================================== */
 .app-layout {
     display: flex;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg-primary);
 }
 
 .app-layout.hidden,
@@ -248,21 +252,20 @@ img { max-width: 100%; height: auto; }
    ========================================== */
 .sidebar {
     width: var(--sidebar-width);
-    min-height: 100vh;
+    height: 100vh;
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
+    flex-shrink: 0;
+    z-index: 50;
     transition: transform var(--transition-base);
 }
 
 .sidebar-header {
-    padding: var(--space-lg) var(--space-lg) var(--space-md);
+    padding: var(--space-md) var(--space-lg);
     border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
 }
 
 .sidebar-logo {
@@ -272,14 +275,14 @@ img { max-width: 100%; height: auto; }
 }
 
 .sidebar-logo img {
-    height: 36px;
-    width: 36px;
+    height: 32px;
+    width: 32px;
     border-radius: var(--radius-sm);
     object-fit: contain;
 }
 
 .sidebar-logo-text {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.3px;
@@ -357,6 +360,8 @@ img { max-width: 100%; height: auto; }
 .sidebar-footer {
     padding: var(--space-md) var(--space-lg);
     border-top: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    background: var(--bg-sidebar);
 }
 
 .sidebar-user {
@@ -445,24 +450,29 @@ img { max-width: 100%; height: auto; }
    ========================================== */
 .main-content {
     flex: 1;
-    margin-left: var(--sidebar-width);
-    min-height: 100vh;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    background: var(--bg-primary);
 }
 
 .top-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-md) var(--space-xl);
-    background: var(--bg-secondary);
+    padding: 0 var(--space-xl);
+    height: 56px;
+    background: hsla(225, 22%, 12%, 0.85);
     border-bottom: 1px solid var(--border-subtle);
     position: sticky;
     top: 0;
-    z-index: 50;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    z-index: 40;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    flex-shrink: 0;
 }
 
 .top-bar-left {
@@ -472,7 +482,7 @@ img { max-width: 100%; height: auto; }
 }
 
 .top-bar-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -490,22 +500,27 @@ img { max-width: 100%; height: auto; }
 
 .banner-area {
     width: 100%;
-    max-height: 180px;
+    max-height: 140px;
     overflow: hidden;
     position: relative;
+    padding: var(--space-md) var(--space-xl) 0;
 }
 
 .banner-area img {
     width: 100%;
-    height: 180px;
+    height: 140px;
     object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
 }
 
 .banner-area.hidden { display: none; }
 
 .content-wrapper {
     flex: 1;
-    padding: var(--space-xl);
+    padding: var(--space-lg) var(--space-xl);
+    width: 100%;
+    max-width: 100%;
 }
 
 .view-section {
@@ -518,12 +533,12 @@ img { max-width: 100%; height: auto; }
 }
 
 .section-title {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--space-lg);
-    padding-bottom: var(--space-sm);
-    border-bottom: 2px solid var(--border-subtle);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -539,9 +554,10 @@ img { max-width: 100%; height: auto; }
    ========================================== */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--space-md);
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-lg);
+    width: 100%;
 }
 
 .stat-card {
@@ -550,11 +566,14 @@ img { max-width: 100%; height: auto; }
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
     position: relative;
     overflow: hidden;
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-    border-left: 3px solid var(--border-color);
+    border-left: 4px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .stat-card:hover {
@@ -569,25 +588,25 @@ img { max-width: 100%; height: auto; }
 .stat-card.stat-baja { border-left-color: var(--color-baja); }
 
 .stat-icon {
-    font-size: 1.5rem;
-    margin-bottom: var(--space-sm);
-    opacity: 0.8;
+    font-size: 1.35rem;
+    margin-bottom: 2px;
+    opacity: 0.9;
 }
 
 .stat-value {
-    font-size: 2rem;
+    font-size: 1.85rem;
     font-weight: 800;
     color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .stat-label {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-top: var(--space-xs);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
 }
 
 /* ==========================================
@@ -595,9 +614,10 @@ img { max-width: 100%; height: auto; }
    ========================================== */
 .charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-lg);
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-lg);
+    width: 100%;
 }
 
 .chart-card {

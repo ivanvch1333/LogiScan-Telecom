@@ -471,17 +471,17 @@ function renderRecentEquipos() {
         return;
     }
 
-    let html = `<table class="data-table"><thead><tr><th>Material</th><th>Asset Tag</th><th>Serie</th><th>Qty SAP</th><th>Qty EAIM</th><th>Desviación</th><th>Cliente / Instalado</th><th>Estado</th></tr></thead><tbody>`;
+    let html = `<table class="data-table"><thead><tr><th>Material / Descripción</th><th>Asset Tag</th><th>Serie</th><th>Qty SAP</th><th>Qty EAIM</th><th>Diferencia</th><th>Cliente / Instalado</th><th>Estado</th></tr></thead><tbody>`;
     recent.forEach(e => {
-        const dev = e.qty_sap - e.qty_eaim;
-        const clienteInfo = e.cliente_nombre ? `<strong>${e.cliente_nombre}</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">${e.cliente_direccion}</span>` : '—';
+        const dev = (e.qty_eaim !== undefined ? e.qty_eaim : 0) - (e.qty_sap !== undefined ? e.qty_sap : 0);
+        const clienteInfo = e.cliente_nombre ? `<strong>${e.cliente_nombre}</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">${e.cliente_direccion || ''}</span>` : '—';
         html += `<tr>
             <td><strong>${e.material}</strong><br><span style="font-size:0.75rem;color:var(--text-secondary);">${e.nombre}</span></td>
             <td><code>${e.asset_tag}</code></td>
             <td><code>${e.numero_serie}</code></td>
-            <td>${e.qty_sap}</td>
-            <td>${e.qty_eaim}</td>
-            <td style="font-weight:700;color:${dev !== 0 ? 'var(--color-mantenimiento)' : 'var(--color-operativo)'}">${dev}</td>
+            <td style="font-weight:600;">${e.qty_sap}</td>
+            <td style="font-weight:600;color:var(--accent-primary);">${e.qty_eaim}</td>
+            <td style="font-weight:700;color:${dev !== 0 ? 'var(--color-emergencia)' : 'var(--color-operativo)'}">${dev > 0 ? '+' + dev : dev}</td>
             <td>${clienteInfo}</td>
             <td><span class="badge ${ESTADO_BADGE[e.estado]}">${LABELS.estado[e.estado]}</span></td>
         </tr>`;
