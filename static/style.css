@@ -212,17 +212,23 @@ img { max-width: 100%; height: auto; }
 .login-form { margin-top: var(--space-lg); }
 
 .login-error {
-    background: var(--color-emergencia-bg);
-    color: var(--color-emergencia);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    margin-bottom: var(--space-md);
-    border: 1px solid hsla(6, 78%, 57%, 0.2);
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    padding: 0.85rem 1rem !important;
+    border-radius: 0.75rem !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 1.25rem !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.15) !important;
+    line-height: 1.4 !important;
     display: none;
 }
 
-.login-error.show { display: block; animation: fadeInDown 0.3s ease; }
+.login-error.show,
+.login-error.block {
+    display: block !important;
+    animation: fadeInDown 0.3s ease;
+}
 
 /* ==========================================
    APP LAYOUT

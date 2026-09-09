@@ -68,7 +68,9 @@ async function api(method, path, body = null, isFormData = false) {
 
     try {
         const res = await fetch(path, opts);
-        if (res.status === 401) {
+        
+        // Si la sesión expiró (401) en una ruta protegida (distinta de login), cerrar sesión
+        if (res.status === 401 && path !== '/api/usuarios/login') {
             logout();
             return null;
         }
@@ -79,7 +81,9 @@ async function api(method, path, body = null, isFormData = false) {
         }
         return data;
     } catch (err) {
-        if (err.message !== 'Failed to fetch') showToast(err.message, 'error');
+        if (path !== '/api/usuarios/login' && err.message !== 'Failed to fetch') {
+            showToast(err.message, 'error');
+        }
         throw err;
     }
 }
@@ -174,25 +178,33 @@ function updateLoginBranding() {
 
 function initLoginForm() {
     const form = document.getElementById('login-form');
+    if (!form) return;
+    
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const errorEl = document.getElementById('login-error');
-        errorEl.classList.add('hidden');
-        errorEl.classList.remove('show', 'block');
+        if (errorEl) {
+            errorEl.classList.add('hidden');
+            errorEl.classList.remove('show', 'block');
+            errorEl.style.display = 'none';
+        }
 
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
 
         if (!username || !password) {
-            errorEl.innerHTML = '<div class="flex items-center gap-2"><span>⚠️</span><span>Ingrese su usuario y contraseña</span></div>';
-            errorEl.classList.remove('hidden');
-            errorEl.classList.add('block');
+            if (errorEl) {
+                errorEl.innerHTML = '<div class="flex items-center gap-2"><span>⚠️</span><span>Ingrese su usuario y contraseña</span></div>';
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('show', 'block');
+                errorEl.style.display = 'block';
+            }
             return;
         }
 
         try {
             const tokenData = await api('POST', '/api/usuarios/login', { username, password });
-            if (!tokenData) return;
+            if (!tokenData || !tokenData.access_token) return;
             APP.token = tokenData.access_token;
             localStorage.setItem('teletrack_token', APP.token);
 
@@ -204,12 +216,16 @@ function initLoginForm() {
             initApp();
         } catch (err) {
             const msg = err.message || 'Error al iniciar sesión';
-            errorEl.innerHTML = `<div class="flex items-start gap-2 text-left">
-                <span class="text-base leading-none mt-0.5">🚨</span>
-                <div class="flex-1">${msg}</div>
-            </div>`;
-            errorEl.classList.remove('hidden');
-            errorEl.classList.add('block');
+            if (errorEl) {
+                errorEl.innerHTML = `<div class="flex items-start gap-2 text-left">
+                    <span class="text-base leading-none mt-0.5">🚨</span>
+                    <div class="flex-1 font-medium">${msg}</div>
+                </div>`;
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('show', 'block');
+                errorEl.style.display = 'block';
+            }
+            showToast(msg, 'error');
         }
     });
 }
