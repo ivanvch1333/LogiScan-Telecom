@@ -8,13 +8,15 @@
 2. [Matriz General de Permisos y Roles (RBAC)](#2-matriz-general-de-permisos-y-roles-rbac)
 3. [Manual para el Rol: ADMINISTRADOR](#3-manual-para-el-rol-administrador)
    - 3.1 Credenciales y Acceso Inicial
-   - 3.2 Monitoreo del Dashboard y Conciliación
-   - 3.3 Gestión de Inventario y Conciliación SAP vs EAIM
-   - 3.4 Registro de Movimientos e Instalaciones a Clientes
-   - 3.5 Uso del Lector QR de Cámara Móvil
-   - 3.6 Exportación de Auditorías (Excel y PDF)
-   - 3.7 Administración de Usuarios y Roles (RBAC)
-   - 3.8 Personalización de Marca (Logo, Banner, Nombre)
+   - 3.2 Política de Bloqueo Progresivo de Cuentas
+   - 3.3 Monitoreo del Dashboard y Conciliación
+   - 3.4 Gestión de Inventario y Conciliación SAP vs EAIM
+   - 3.5 Registro de Movimientos e Instalaciones a Clientes
+   - 3.6 Uso del Lector QR de Cámara Móvil
+   - 3.7 Exportación de Auditorías (Excel y PDF)
+   - 3.8 Administración de Usuarios y Roles (RBAC)
+   - 3.9 Bitácora de Auditoría y Logs del Sistema
+   - 3.10 Personalización de Marca (Logo, Banner, Nombre)
 4. [Manual para el Rol: TÉCNICO / BODEGUERO](#4-manual-para-el-rol-técnico--bodeguero)
    - 4.1 Acceso al Sistema
    - 4.2 Consulta del Dashboard
@@ -52,6 +54,7 @@ El sistema opera bajo un **Control de Acceso Basado en Roles (RBAC)** que garant
 | Escáner de Códigos QR/Barras con Cámara Móvil | ✅ | ✅ |
 | Exportación de Auditoría a Excel (`.xlsx`) y PDF (A4 Landscape) | ✅ | ✅ |
 | **Gestión de Usuarios (Crear, cambiar rol, eliminar usuarios)** | ✅ | ❌ *(Bloqueado)* |
+| **📜 Bitácora de Auditoría y Logs del Sistema** | ✅ | ❌ *(Bloqueado)* |
 | **Ajustes de Marca (Nombre de empresa, Logo oficial, Banner)** | ✅ | ❌ *(Bloqueado)* |
 
 ---
@@ -68,7 +71,26 @@ El **Administrador** tiene control operativo completo del sistema, además de la
 2. Escriba su usuario y contraseña.
 3. Haga clic en **"Iniciar Sesión"**.
 
-## 3.2 Monitoreo del Dashboard y Conciliación
+## 3.2 Política de Bloqueo Progresivo de Cuentas
+
+El sistema protege contra accesos no autorizados mediante un **bloqueo temporal escalonado**. Si el usuario o un atacante ingresa credenciales incorrectas, se aplica la siguiente política:
+
+| Intentos Fallidos | Consecuencia |
+|:-----------------:|:-------------|
+| 1–2 intentos | Mensaje de advertencia: `"Intento X de 3 antes de bloqueo temporal."` |
+| 3 intentos | La cuenta se **congela por 3 minutos**. |
+| 5 intentos | La cuenta se **congela por 10 minutos**. |
+| 10+ intentos | La cuenta se **congela por 60 minutos** (1 hora). |
+
+**Comportamiento durante el bloqueo:**
+* Cualquier intento de inicio de sesión durante el periodo de congelamiento mostrará: `"Cuenta congelada por intentos fallidos. Intente nuevamente en X min Y seg."`
+* El mensaje incluye un **conteo regresivo exacto** del tiempo restante.
+* Al ingresar correctamente la contraseña (una vez desbloqueada la cuenta), el contador se **resetea a cero**.
+
+> [!NOTE]
+> Todos los eventos de bloqueo y acceso fallido quedan registrados automáticamente en la **Bitácora de Auditoría** (sección 3.9), incluyendo la IP de origen del intento.
+
+## 3.3 Monitoreo del Dashboard y Conciliación
 Al ingresar verá 5 tarjetas de resumen dinámico:
 * **Total Materiales:** Suma global de activos en base de datos.
 * **Disponible:** Equipos listos en almacén para asignación.
@@ -78,20 +100,20 @@ Al ingresar verá 5 tarjetas de resumen dinámico:
 
 Además, incluye gráficos de distribución por categoría (Router, Switch, OLT, etc.) y por ubicación SLOC (`1000`, `2000`, `1010`, `Almacén Central`), junto con la tabla de materiales recientemente ingresados.
 
-## 3.3 Gestión de Inventario y Conciliación SAP vs EAIM
+## 3.4 Gestión de Inventario y Conciliación SAP vs EAIM
 En la sección **📡 Equipos**:
 1. **Filtros Avanzados:** Filtre en tiempo real por palabra clave (Serie, Asset Tag, Material), Planta, Ubicación SLOC (`1000`, `2000`, `1010`, `Almacén Central`), Estado, Mes y Año de registro.
 2. **Cálculo de Desviación:** El sistema calcula automáticamente la fórmula:
-   $$\text{Desviación} = Qty_{SAP} - Qty_{EAIM}$$
-   * Si la desviación es **0**, se muestra en verde (inventario conciliado).
-   * Si la desviación es diferente de 0, se resalta en rojo (alerta de descalce).
+   $$\text{Diferencia} = Qty_{EAIM} - Qty_{SAP}$$
+   * Si la diferencia es **0**, se muestra en verde (inventario conciliado).
+   * Si la diferencia es distinta de 0, se resalta en rojo (alerta de descalce).
 3. **Registrar Nuevo Equipo:**
    - Haga clic en **"+ Nuevo Equipo"**.
-   - Ingrese los datos obligatorios: Nombre, Código Material SAP, Nº Serie, Asset Tag (Placa), Marca, Modelo, Plant, SLOC, Qty SAP, Qty EAIM y Categoría.
+   - Ingrese los datos obligatorios conforme a las cabeceras SAP/EAIM: Código Material SAP, Descripción Material, Asset Tag, Serial Number, Plant (`984L`), SLOC (`2000`), Qty SAP, Qty EAIM, Categoría y Estado.
    - *(Opcional)* Si el equipo se registra ya instalado, complete Nombre y Dirección del Cliente.
    - Haga clic en **"Registrar Activo"**.
 
-## 3.4 Registro de Movimientos e Instalaciones a Clientes
+## 3.5 Registro de Movimientos e Instalaciones a Clientes
 En la sección **🔄 Movimientos**:
 1. Seleccione el equipo desde el desplegable.
 2. Elija el **Tipo de Movimiento**:
@@ -104,24 +126,36 @@ En la sección **🔄 Movimientos**:
 5. *(Opcional)* Cambie el estado del equipo o agregue observaciones técnicas.
 6. Haga clic en **"Registrar Movimiento"**.
 
-## 3.5 Uso del Lector QR de Cámara Móvil
+## 3.6 Uso del Lector QR de Cámara Móvil
 En la sección **🔍 Lector QR / Cámara**:
 1. En teléfonos móviles o computadoras con cámara web, presione **"📷 Iniciar Escáner de Cámara"**.
 2. Apunte la cámara hacia el código QR o código de barras del equipo.
 3. El sistema detectará el serial automáticamente y desplegará la ficha completa del activo, su ubicación actual, cliente asignado y el historial cronológico de movimientos.
 
-## 3.6 Exportación de Auditorías (Excel y PDF)
+## 3.7 Exportación de Auditorías (Excel y PDF)
 En la parte superior de la sección **Equipos**:
-* **Boton 📊 Excel:** Genera un libro `.xlsx` con todas las columnas de inventario, stock SAP, stock EAIM, Desviación, datos del Cliente y fecha de registro.
+* **Boton 📊 Excel:** Genera un libro `.xlsx` con las 17 columnas del inventario (MES, AÑO, PLANT, SLOC, MATERIAL, DESCRIPCIÓN MATERIAL, ASSET TAG, SERIAL NUMBER, QTY SAP, QTY EAIM, DIFERENCIA, DIFERENCIA ABS, EQUIPMENT STATUS, WORK ORDER, CLIENTE Y DIRECCIÓN, SO REGULARIZACIÓN, COMENTARIOS).
 * **Boton 📄 PDF:** Genera un documento PDF horizontal (formato A4 Landscape) con encabezados institucionales, resumen estadístico por estados, líneas de separación y paginado automático.
 
-## 3.7 Administración de Usuarios y Roles (RBAC) *(Exclusivo Admin)*
+## 3.8 Administración de Usuarios y Roles (RBAC) *(Exclusivo Admin)*
 En la sección **👥 Usuarios**:
 1. **Crear Usuario:** Haga clic en **"+ Nuevo Usuario"**, ingrese el nombre, username, correo, rol (`admin` o `tecnico`) y una contraseña que cumpla las políticas de seguridad (mínimo 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial).
 2. **Cambiar Rol:** Presione el botón 🔄 en la fila correspondiente para alternar el rol entre Administrador y Técnico.
 3. **Eliminar Usuario:** Presione el botón 🗑 para eliminar un usuario. *(El sistema no permite que un admin se elimine o cambie de rol a sí mismo)*.
 
-## 3.8 Personalización de Marca (Logo, Banner, Nombre) *(Exclusivo Admin)*
+## 3.9 Bitácora de Auditoría y Logs del Sistema *(Exclusivo Admin)*
+En la sección **📜 Logs del Sistema**:
+1. Se presenta una tabla cronológica con los últimos **200 eventos** del sistema, ordenados del más reciente al más antiguo.
+2. Cada registro incluye: **Fecha/Hora**, **Usuario** responsable, **Nivel** del evento (INFO, WARNING, CRITICAL), **Código de Acción**, **Detalle descriptivo** e **IP de Origen**.
+3. **Filtros disponibles:**
+   - **Búsqueda por texto:** Busca coincidencias en el nombre de usuario, código de acción o descripción del evento.
+   - **Filtro por nivel:** Seleccione `INFO (Operativo)`, `WARNING (Advertencia)` o `CRITICAL (Bloqueo / Alerta)` para aislar tipos específicos de eventos.
+4. Haga clic en **🔄 Actualizar Logs** para refrescar la tabla con los últimos eventos registrados.
+
+> [!IMPORTANT]
+> Los eventos de nivel **CRITICAL** incluyen los bloqueos de cuenta por intentos fallidos (`BLOQUEO_CUENTA`) e intentos de acceso a cuentas congeladas (`ACCESO_BLOQUEADO`), junto con la IP de origen, lo que permite al administrador rastrear posibles ataques de fuerza bruta.
+
+## 3.10 Personalización de Marca (Logo, Banner, Nombre) *(Exclusivo Admin)*
 En la sección **⚙️ Ajustes**:
 1. Cambie el **Nombre del Proyecto / Empresa**.
 2. Suba el **Logotipo Oficial** (PNG o JPG). Podrá ver la vista previa al instante.
@@ -142,7 +176,7 @@ Permite visualizar los totales de stock, equipos disponibles, asignados, en mant
 
 ## 4.3 Registro de Materiales y Conciliación en Bodega
 1. Ingrese a **📡 Equipos**.
-2. Puede realizar ingresos físicos de nuevos equipos especificando las cantidades $Qty_{SAP}$ y $Qty_{EAIM}$.
+2. Puede realizar ingresos físicos de nuevos equipos especificando las cantidades $Qty_{SAP}$ y $Qty_{EAIM}$. El sistema calcula automáticamente la diferencia: $Diferencia = Qty_{EAIM} - Qty_{SAP}$.
 3. Realice búsquedas rápidas por placa o serial al momento de recibir o despachar mercancía.
 
 ## 4.4 Traslados de Equipos e Instalaciones en Campo
@@ -159,7 +193,7 @@ Permite visualizar los totales de stock, equipos disponibles, asignados, en mant
 Los técnicos pueden generar descargas de reportes en **Excel** y **PDF** para adjuntarlos a las actas de entrega-recepción o respaldos de cuadrilla.
 
 ## 4.7 Restricciones de Seguridad Visibles
-Por seguridad del sistema, el rol Técnico **no visualiza** en el menú lateral las pestañas de **Usuarios** ni **Ajustes de Marca**. Si un técnico intenta acceder directamente mediante peticiones API a estas rutas, el servidor retornará un código de error `403 Forbidden` (Acceso denegado).
+Por seguridad del sistema, el rol Técnico **no visualiza** en el menú lateral las pestañas de **Usuarios**, **Logs del Sistema** ni **Ajustes de Marca**. Si un técnico intenta acceder directamente mediante peticiones API a estas rutas, el servidor retornará un código de error `403 Forbidden` (Acceso denegado).
 
 ---
 
@@ -167,6 +201,15 @@ Por seguridad del sistema, el rol Técnico **no visualiza** en el menú lateral 
 
 ### ¿Qué ocurre si la contraseña no cumple los requisitos al crear un usuario?
 El sistema rechazará el formulario tanto en el frontend como en el servidor, mostrando la alerta: `"La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, un número y un carácter especial"`.
+
+### ¿Qué pasa si ingreso mal la contraseña varias veces?
+El sistema aplica un **bloqueo progresivo**: tras 3 intentos fallidos la cuenta se congela 3 minutos; tras 5 intentos, 10 minutos; y tras 10 intentos, 60 minutos. El mensaje dentro del formulario de login indicará el tiempo restante exacto.
+
+### ¿Cómo desbloqueo mi cuenta si fue congelada?
+Debe esperar a que transcurra el periodo de bloqueo indicado. Una vez que el tiempo expire, podrá iniciar sesión normalmente. Si ingresa la contraseña correcta, el contador se resetea automáticamente a cero.
+
+### ¿Dónde puedo ver los intentos fallidos de acceso al sistema?
+El **Administrador** puede acceder a la sección **📜 Logs del Sistema** en el menú lateral. Allí podrá filtrar por nivel `CRITICAL` para visualizar todos los eventos de bloqueo de cuenta, incluyendo la IP de origen de cada intento.
 
 ### ¿Qué hago si la cámara del móvil no abre en el lector QR?
 Verifique que le ha otorgado permisos de cámara al navegador web en la configuración del smartphone. El sitio debe ejecutarse sobre `localhost` o en una conexión segura `https://`.

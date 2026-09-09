@@ -49,7 +49,7 @@ En la gestión operativa de bodegas y cuadrillas de telecomunicaciones en campo,
 - **Tiempos de Auditoría Elevados:** Dificultad para consultar historiales de novedades en campo.
 - **Falta de Estandarización:** Uso de hojas de cálculo aisladas sin control de roles ni inmutabilidad de datos.
 
-La solución unifica el escaneo directo de códigos QR/Barras con la cámara del dispositivo móvil, la conciliación automática ($Qty_{SAP} - Qty_{EAIM}$), el control de acceso por roles (RBAC) y la exportación de reportes inmutables en Excel y PDF.
+La solución unifica el escaneo directo de códigos QR/Barras con la cámara del dispositivo móvil, la conciliación automática ($Qty_{EAIM} - Qty_{SAP}$), el control de acceso por roles (RBAC) y la exportación de reportes inmutables en Excel y PDF.
 
 ## 1.3 Objetivos
 * **Objetivo General:** Desarrollar un sistema web móvil integral para el control de inventarios, conciliación de activos y trazabilidad de telecomunicaciones mediante tecnologías web modernas.
@@ -63,15 +63,18 @@ La solución unifica el escaneo directo de códigos QR/Barras con la cámara del
 ### Requerimientos Funcionales (RF)
 * **RF-01 (Autenticación y RBAC):** Inicio de sesión con usuario y contraseña (superusuario: `ectronix_log_amb` / `Macara@13`). Validación de contraseñas de al menos 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial.
 * **RF-02 (Gestión de Activos):** Registro de equipos con Material SAP, Asset Tag, Número de Serie, Plant, SLOC (`1000`, `2000`, `1010`, `Almacén Central`), $Qty_{SAP}$ y $Qty_{EAIM}$.
-* **RF-03 (Conciliación Automática):** Cálculo dinámico de la desviación ($Qty_{SAP} - Qty_{EAIM}$).
+* **RF-03 (Conciliación Automática):** Cálculo dinámico de la diferencia ($Qty_{EAIM} - Qty_{SAP}$).
 * **RF-04 (Trazabilidad y Movimientos):** Registro de traslados e instalaciones asociando nombre del cliente y dirección.
 * **RF-05 (Escáner QR en Móvil):** Lectura directa de códigos QR/Barras mediante la cámara web/móvil usando `html5-qrcode`.
 * **RF-06 (Reportes Auditables):** Exportación del stock filtrado a formatos Excel (`.xlsx`) y PDF horizontal (A4 landscape) con resumen estadístico.
+* **RF-07 (Bloqueo Progresivo de Cuentas):** Bloqueo temporal escalonado ante intentos fallidos de autenticación: 3 intentos → 3 min, 5 intentos → 10 min, 10 intentos → 60 min. Reseteo automático tras login exitoso.
+* **RF-08 (Bitácora de Auditoría):** Registro automático de todos los eventos de seguridad y operación en la tabla `logs_sistema`, con niveles INFO/WARNING/CRITICAL, consultable por administradores via `GET /api/logs`.
 
 ### Requerimientos No Funcionales (RNF)
 * **RNF-01 (Desempeño):** Respuestas de la API REST inferiores a 1.5 segundos en búsquedas por serial.
 * **RNF-02 (Responsividad):** Diseño adaptable a dispositivos móviles (320px+), tablets y computadoras de escritorio.
 * **RNF-03 (Seguridad):** Hashing de contraseñas con algoritmo Bcrypt y protección de rutas mediante tokens Bearer.
+* **RNF-04 (Auditoría y Trazabilidad):** Bitácora inmutable de eventos con registro de IP de origen, timestamp UTC y usuario responsable para cada operación crítica del sistema.
 
 ## 1.5 Arquitectura de Información y Wireframes (UI/UX)
 
@@ -82,12 +85,12 @@ El diseño de interfaz sigue un patrón **SPA (Single Page Application)** con pa
 | LOGISCAN TELECOM                                            [Usuario Admin] [Salir]|
 +-------------------+---------------------------------------------------------------+
 | 📊 Dashboard       |  +-------------+  +-------------+  +-------------+            |
-| 📡 Equipos        |  | TOTAL: 24   |  | DISPO: 18   |  | ASIGNADO: 4 |            |
+| 📡 Equipos        |  | TOTAL: 27   |  | DISPO: 23   |  | ASIGNADO: 2 |            |
 | 🔄 Movimientos    |  +-------------+  +-------------+  +-------------+            |
 | 🔍 Lector QR      |                                                               |
 | 👥 Usuarios (Admin)|  [Filtros: Planta | SLOC (1000, 2000, 1010) | Estado | Buscar ] |
-| ⚙️ Ajustes (Admin) |  +---------------------------------------------------------+ |
-|                   |  | Material | Asset Tag | Serie | SAP | EAIM | Desviación| |
+| 📜 Logs    (Admin)|  +---------------------------------------------------------+ |
+| ⚙️ Ajustes (Admin) |  | Material | Asset Tag | Serie | SAP | EAIM | Diferencia| |
 |                   |  +---------------------------------------------------------+ |
 +-------------------+---------------------------------------------------------------+
 ```
@@ -256,6 +259,8 @@ Schema::create('usuarios', function (Blueprint $table) {
     $table->string('email', 100)->unique();
     $table->string('password');
     $table->enum('rol', ['admin', 'tecnico'])->default('tecnico');
+    $table->integer('intentos_fallidos')->default(0);       // Bloqueo progresivo
+    $table->timestamp('bloqueado_hasta')->nullable();       // Timestamp de desbloqueo
     $table->timestamps();
 });
 ```
@@ -298,6 +303,19 @@ Schema::create('historial_movimientos', function (Blueprint $table) {
 });
 ```
 
+### Tabla `logs_sistema` (`0004_01_01_000000_create_logs_sistema_table.php`)
+```php
+Schema::create('logs_sistema', function (Blueprint $table) {
+    $table->id();
+    $table->string('usuario_username', 50)->nullable()->index();
+    $table->enum('nivel', ['INFO', 'WARNING', 'CRITICAL'])->default('INFO');
+    $table->string('accion', 100)->index();
+    $table->text('detalle');
+    $table->string('ip_origen', 50)->nullable();
+    $table->timestamp('fecha')->useCurrent();
+});
+```
+
 ## 4.3 Modelos Eloquent ORM
 
 ### Modelo `Equipo` (`app/Models/Equipo.php`)
@@ -317,12 +335,12 @@ class Equipo extends Model
         'categoria', 'estado', 'ubicacion_actual'
     ];
 
-    // Cálculo dinámico de la desviación en JSON: Qty_SAP - Qty_EAIM
+    // Cálculo dinámico de la diferencia en JSON: Qty_EAIM - Qty_SAP
     protected $appends = ['desviacion'];
 
     public function getDesviacionAttribute()
     {
-        return $this->qty_sap - $this->qty_eaim;
+        return $this->qty_eaim - $this->qty_sap;
     }
 
     public function historial()
@@ -340,6 +358,7 @@ use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ConfigController;
+use App\Http\Controllers\LogController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas Públicas
@@ -362,6 +381,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/usuarios/registro', [UsuarioController::class, 'store']);
         Route::put('/usuarios/{id}/rol', [UsuarioController::class, 'updateRol']);
         Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy']);
+        Route::get('/logs', [LogController::class, 'index']);
         Route::post('/config', [ConfigController::class, 'update']);
     });
 });
