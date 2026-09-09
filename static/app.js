@@ -75,9 +75,26 @@ async function api(method, path, body = null, isFormData = false) {
             return null;
         }
         if (res.status === 204) return null;
-        const data = await res.json();
+        
+        let data = {};
+        try {
+            data = await res.json();
+        } catch {
+            data = {};
+        }
+
         if (!res.ok) {
-            throw new Error(data.detail || 'Error en la solicitud');
+            let errorMsg = 'Error en la solicitud';
+            if (typeof data.detail === 'string') {
+                errorMsg = data.detail;
+            } else if (Array.isArray(data.detail)) {
+                errorMsg = data.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+            } else if (data.detail && typeof data.detail === 'object') {
+                errorMsg = data.detail.msg || JSON.stringify(data.detail);
+            } else if (data.message) {
+                errorMsg = data.message;
+            }
+            throw new Error(errorMsg);
         }
         return data;
     } catch (err) {
@@ -93,6 +110,7 @@ async function api(method, path, body = null, isFormData = false) {
 // ==========================================
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `
@@ -101,36 +119,32 @@ function showToast(message, type = 'success') {
         <button class="toast-close" onclick="this.parentElement.remove()">×</button>
     `;
     container.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+    setTimeout(() => toast.remove(), 5000);
 }
 
 // ==========================================
 // DATE FORMATTER
 // ==========================================
 function formatDate(dateStr) {
-    if (!dateStr) return '—';
+    if (!dateStr) return 'N/A';
     const d = new Date(dateStr);
-    const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    const day = d.getDate();
-    const month = months[d.getMonth()];
-    const year = d.getFullYear();
-    const h = String(d.getHours()).padStart(2, '0');
-    const m = String(d.getMinutes()).padStart(2, '0');
-    return `${day} ${month} ${year}, ${h}:${m}`;
+    return d.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 }
 
 // ==========================================
-// NAVIGATION
+// NAVIGATION / ROUTER
 // ==========================================
 function navigateTo(section) {
-    // Hide scanner if open
-    stopCameraScanner();
+    // Hide all views
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
 
-    // Hide all view sections
-    document.querySelectorAll('.view-section').forEach(el => {
-        el.classList.remove('active');
-    });
-    // Show target
+    // Show target view
     const target = document.getElementById(`view-${section}`);
     if (target) target.classList.add('active');
 
@@ -159,6 +173,13 @@ function navigateTo(section) {
 // LOGIN FLOW
 // ==========================================
 function showLogin() {
+    const errorEl = document.getElementById('login-error');
+    if (errorEl) {
+        errorEl.classList.add('hidden');
+        errorEl.classList.remove('show', 'block');
+        errorEl.style.display = 'none';
+        errorEl.innerHTML = '';
+    }
     document.getElementById('login-page').classList.remove('hidden');
     document.getElementById('app-layout').classList.add('hidden');
     loadConfig().then(() => updateLoginBranding());
@@ -178,8 +199,9 @@ function updateLoginBranding() {
 
 function initLoginForm() {
     const form = document.getElementById('login-form');
-    if (!form) return;
-    
+    if (!form || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const errorEl = document.getElementById('login-error');
@@ -187,19 +209,33 @@ function initLoginForm() {
             errorEl.classList.add('hidden');
             errorEl.classList.remove('show', 'block');
             errorEl.style.display = 'none';
+            errorEl.innerHTML = '';
         }
 
-        const username = document.getElementById('login-username').value.trim();
-        const password = document.getElementById('login-password').value;
+        const usernameInput = document.getElementById('login-username');
+        const passwordInput = document.getElementById('login-password');
+        const username = usernameInput ? usernameInput.value.trim() : '';
+        const password = passwordInput ? passwordInput.value : '';
 
         if (!username || !password) {
             if (errorEl) {
-                errorEl.innerHTML = '<div class="flex items-center gap-2"><span>⚠️</span><span>Ingrese su usuario y contraseña</span></div>';
+                errorEl.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">⚠️</span>
+                        <span>Ingrese su usuario y contraseña</span>
+                    </div>`;
                 errorEl.classList.remove('hidden');
                 errorEl.classList.add('show', 'block');
                 errorEl.style.display = 'block';
             }
             return;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Iniciar Sesión';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Verificando...';
         }
 
         try {
@@ -217,15 +253,21 @@ function initLoginForm() {
         } catch (err) {
             const msg = err.message || 'Error al iniciar sesión';
             if (errorEl) {
-                errorEl.innerHTML = `<div class="flex items-start gap-2 text-left">
-                    <span class="text-base leading-none mt-0.5">🚨</span>
-                    <div class="flex-1 font-medium">${msg}</div>
-                </div>`;
+                errorEl.innerHTML = `
+                    <div class="flex items-start gap-2 text-left">
+                        <span class="text-base leading-none mt-0.5">🚨</span>
+                        <div class="flex-1 font-medium">${msg}</div>
+                    </div>`;
                 errorEl.classList.remove('hidden');
                 errorEl.classList.add('show', 'block');
                 errorEl.style.display = 'block';
             }
             showToast(msg, 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
         }
     });
 }
